@@ -9,5 +9,7 @@ __pycache__/
 report.pdf
 app.log
 .env
+
 poetry.lock
 
+out/
