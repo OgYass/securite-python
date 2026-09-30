@@ -3,14 +3,16 @@ from scapy.all import sniff
 from scapy.packet import Packet 
 
 from src.tp1.utils.lib import choose_interface
+from src.tp1.utils.args import Args
+from src.tp1.utils.config import logger
 
-from tp1.utils.config import logger
+
 
 
 class Capture:
     def __init__(self) -> None:
-        self.interface = choose_interface()
-        self.summary = ""
+        self.interface:str = choose_interface()
+        self.summary:str = ""
         self._protocols: dict[str, int] = {}
         
     def _handle_packet(self, pkt: Packet) -> None:
@@ -23,11 +25,15 @@ class Capture:
         """
         Capture network traffic from an interface
         """
-        interface = self.interface
-        logger.info(f"Capture traffic from interface {interface}")
+        
+        if Args.is_pcap:
+          logger.info(f"Capture offline of {Args.pcap_file}")
+          pass # TODO offline
+        else:
+          interface = self.interface
+          logger.info(f"Capture traffic from interface {interface}")
 
-        sniff(prn=self._handle_packet, timeout=30)
-        # logger.debug(t)
+          sniff(prn=self._handle_packet, timeout=2)
         
         self.interface = ""
         
