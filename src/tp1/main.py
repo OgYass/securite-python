@@ -17,6 +17,5 @@ def main():
     report.generate("array")
     report.save(filename)
 
-
 if __name__ == "__main__":
     main()
