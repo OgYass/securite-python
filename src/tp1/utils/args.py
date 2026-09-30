@@ -8,6 +8,8 @@ parser = argparse.ArgumentParser("PySec")
 parser.add_argument("--pcap", "-p", help="The pcap file you wish to input", type=str)
 parser.add_argument("--iface", "-i", help="The interface you wish to listen to", type=str)
 parser.add_argument("--out", "-o", help="File containing the report (json format)", type=str)
+parser.add_argument("--verbose", "-v", help="Enable verbose", action="store_true")
+
 
 args = parser.parse_args()
 
@@ -25,10 +27,12 @@ class Args:
     """Interface to listen to, ``None`` for default."""
         
 
-    is_pcap:bool = pcap_file != None
+    is_offline:bool = pcap_file != None
     """
     Whether packets are read from a pcap file instead of a live capture.
     """
     
     report_path: str | None = args.out
     """"Path for the report json, if None we don't need to generate one"""
+
+    verbose: bool = args.verbose or False
