@@ -64,7 +64,17 @@ class Report:
             self.array = array
 
     def generate_json(self) -> None:
-        json_output = {"report":[]}
+        json_output = {"protocols":{},"attacks": [],"flag": str}
         for couple in self.array:
-            json_output["report"].append({"protocol": couple[0], "count": couple[1]})
+            json_output["protocols"].append({"protocol": couple[0], "count": couple[1]})
+        # TODO: recuperer la liste des attacks depuis summary(?)
+        for attacks in self.summary:
+            json_output["attacks"].append({"type": attacks[0], "attacker":attacks[1]})
+        json_output["flag"] = self.get_flag()
         self.json = json.dumps(json_output)
+
+    def get_flag(self) -> str:
+        flag = ''
+        capture = self.capture
+        # TODO: trouver le flag
+        return flag
