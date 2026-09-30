@@ -60,6 +60,6 @@ class Report:
             Parse le summary pour récuperer les données
             """
             for i in range(len(self.summary)):
-                array.append(self.summary[i] + self.summary[i+1])
+                array.append(self.summary[i] + int(self.summary[i+1]))
                 i = i + 2
             self.array = array
