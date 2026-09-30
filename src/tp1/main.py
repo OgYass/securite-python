@@ -5,11 +5,14 @@ from tp1.utils.report import Report
 
 def main():
     logger.info("Starting TP1")
-
+    
     capture = Capture()
     capture.capture_traffic()
     capture.analyse("tcp")
+    
+    capture._gen_summary()
     summary = capture.get_summary()
+    logger.debug("summary : {}".format(summary))
 
     filename = "report.pdf"
     report = Report(capture, filename, summary)

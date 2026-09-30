@@ -1,4 +1,7 @@
+from scapy.all import sniff
+
 from src.tp1.utils.lib import choose_interface
+
 from tp1.utils.config import logger
 
 
@@ -6,6 +9,13 @@ class Capture:
     def __init__(self) -> None:
         self.interface = choose_interface()
         self.summary = ""
+        self._protocols: dict[str, int] = {}
+        
+    def _handle_packet(self, pkt) -> None:
+        for proto in pkt.layers():
+          name = proto.__name__
+          self._protocols[name] = self._protocols.get(name, 0) + 1
+          
 
     def capture_traffic(self) -> None:
         """
@@ -14,17 +24,24 @@ class Capture:
         interface = self.interface
         logger.info(f"Capture traffic from interface {interface}")
 
+        sniff(prn=self._handle_packet, timeout=30)
+        # logger.debug(t)
+        
+        self.interface = ""
+        
+
     def sort_network_protocols(self) -> str:
         """
         Sort and return all captured network protocols
         """
-        return ""
+        return "\n".join({k: v for k, v in sorted(self._protocols.items(),
+                                                  key=lambda i: i[1], reverse=True)})
 
     def get_all_protocols(self) -> str:
         """
         Return all protocols captured with total packets number
         """
-        return ""
+        return ";".join(self._protocols.keys())
 
     def analyse(self, protocols: str) -> None:
         """
@@ -57,4 +74,8 @@ class Capture:
         Generate summary
         """
         summary = ""
+
+        for k, v in self._protocols.items():
+          summary += "{} {}\n".format(k, v)
+
         return summary
