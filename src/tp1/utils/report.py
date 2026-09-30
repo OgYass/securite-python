@@ -47,7 +47,7 @@ class Report:
             """
             for i in range(len(self.summary)):
                 x.append(self.summary[i])
-                y.append(self.summary[i+1])
+                y.append(int(self.summary[i+1]))
                 i = i+ 2
             graph = pylab.pyplot
             graph.bar(x,y)
