@@ -11,3 +11,4 @@ app.log
 .env
 poetry.lock
 
+sample.pcap
