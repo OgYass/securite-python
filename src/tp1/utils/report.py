@@ -1,6 +1,8 @@
 from tp1.utils.capture import Capture
 from tp1.utils.logger import logger
-from pylab import *
+import numpy as np
+import matplotlib.pyplot as pylab
+import json
 
 class Report:
     def __init__(self, capture: Capture, filename: str, summary: str):
@@ -8,8 +10,9 @@ class Report:
         self.filename = filename
         self.title = "TITRE DU RAPPORT"
         self.summary = summary
-        self.array = ""
-        self.graph = ""
+        self.array = []
+        self.graph = pylab.pyplot()
+        self.json = {}
 
     def concat_report(self) -> str:
         """
@@ -40,26 +43,28 @@ class Report:
         """
         if param == "graph":
             # TODO: generate graph
-            x = []
-            y = []
+            x,y = []
             """
             Parse le summary pour récuperer les données
             """
-            for i in range(len(self.summary)):
+            for i in range(0,len(self.summary),2):
                 x.append(self.summary[i])
                 y.append(int(self.summary[i+1]))
-                i = i+ 2
-            graph = pylab.pyplot
-            graph.bar(x,y)
-            logger(graph.show())
+            graph = pylab.bar(x,y)
             self.graph = graph
         elif param == "array":
             # TODO: generate array
-            array = []
+            array = [[protocol, count]]
             """
             Parse le summary pour récuperer les données
             """
-            for i in range(len(self.summary)):
-                array.append(self.summary[i] + int(self.summary[i+1]))
-                i = i + 2
+            for i in range(0,len(self.summary),2):
+                array.append([self.summary[i],int(self.summary[i+1])])
+
             self.array = array
+
+    def generate_json(self) -> None:
+        json_output = {"report":[]}
+        for couple in self.array:
+            json_output["report"].append({"protocol": couple[0], "count": couple[1]})
+        self.json = json.dumps(json_output)
