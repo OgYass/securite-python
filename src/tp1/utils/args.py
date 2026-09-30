@@ -25,12 +25,6 @@ class Args:
     
     iface:str | None = args.pcap
     """Interface to listen to, ``None`` for default."""
-        
-
-    is_offline:bool = pcap_file != None
-    """
-    Whether packets are read from a pcap file instead of a live capture.
-    """
     
     report_path: str | None = args.out
     """"Path for the report json, if None we don't need to generate one"""

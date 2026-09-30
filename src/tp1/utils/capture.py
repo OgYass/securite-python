@@ -37,12 +37,12 @@ class Summary:
 
 
 class Capture:
-    def __init__(self, timeout: int = 5) -> None:
+    def __init__(self, timeout: int = 5, pcap_file: str | None = None) -> None:
         self.interface:str = choose_interface()
         """Interface to sniff if no pcap"""
         
-        self.pcap_file: str | None = Args.pcap_file
-        
+        self.pcap_file: str | None = pcap_file or Args.pcap_file or None
+        self.is_offline:bool = self.pcap_file != None
         
         self.summary:Summary | None = None
         self.attacks:list[Attack] = []
@@ -67,17 +67,19 @@ class Capture:
         
         packets: PacketList | None = None
         
-        if Args.is_offline:
+        if self.is_offline:
           logger.info(f"Capture offline of {Args.pcap_file}")
           packets = sniff(prn=self._handle_packet, offline=self.pcap_file, timeout=self._timeout)
         else:
           interface = self.interface
-          logger.info(f"Capture traffic from interface {interface}")
+          logger.info(f"Capture traffic from interface {interface} for {self._timeout} seconds (Press Ctrl + C to interrupt)")
 
           packets = sniff(prn=self._handle_packet, iface = self.interface, timeout=self._timeout)
         
         self.interface = ""
         self.captured_packets = packets
+        
+        logger.info(f"{len(self.captured_packets or [])} packets captured")
         
 
     def sort_network_protocols(self) -> list[str]:
@@ -114,6 +116,10 @@ class Capture:
         # TODO Check Port Scan
         
         # TODO Check SQL Injection
+        
+        
+        if len(self.attacks) > 0:
+            logger.info(f"{len(self.attacks)} attacks detected out of {len(self.captured_packets or [])}")
 
         self.summary = self._gen_summary()
 
