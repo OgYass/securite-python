@@ -10,15 +10,21 @@ from src.tp1.utils.config import logger
 
 
 class Capture:
-    def __init__(self) -> None:
+    def __init__(self, timeout: int = 5) -> None:
         self.interface:str = choose_interface()
+        """Interface to sniff if no pcap"""
+        
+        self.pcap_file: str | None = Args.pcap_file
         self.summary:str = ""
+        
         self._protocols: dict[str, int] = {}
+        self._timeout:int = timeout
         
     def _handle_packet(self, pkt: Packet) -> None:
+        logger.debug("{}".format(pkt.summary()))
         for proto in pkt.layers():
-          name = proto.__name__
-          self._protocols[name] = self._protocols.get(name, 0) + 1
+            name = proto.__name__
+            self._protocols[name] = self._protocols.get(name, 0) + 1
           
 
     def capture_traffic(self) -> None:
@@ -26,14 +32,14 @@ class Capture:
         Capture network traffic from an interface
         """
         
-        if Args.is_pcap:
+        if Args.is_offline:
           logger.info(f"Capture offline of {Args.pcap_file}")
-          pass # TODO offline
+          sniff(prn=self._handle_packet, offline=self.pcap_file, timeout=self._timeout)
         else:
           interface = self.interface
           logger.info(f"Capture traffic from interface {interface}")
 
-          sniff(prn=self._handle_packet, timeout=2)
+          sniff(prn=self._handle_packet, iface = self.interface, timeout=self._timeout)
         
         self.interface = ""
         
