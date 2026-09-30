@@ -1,11 +1,7 @@
-def hello_world() -> str:
-    """
-    Hello world function
+from src.tp1.utils.args import Args
 
-    :return: "hello world"
-    """
-    return "hello world"
-
+from scapy.config import conf
+from src.tp1.utils.config import logger
 
 def choose_interface() -> str:
     """
@@ -13,5 +9,6 @@ def choose_interface() -> str:
 
     :return: network interface
     """
-    interface = ""
+    interface = Args.iface or conf.iface.name or ""
+    
     return interface
