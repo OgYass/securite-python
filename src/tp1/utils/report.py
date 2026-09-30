@@ -1,5 +1,6 @@
 from tp1.utils.capture import Capture
-
+from tp1.utils.logger import logger
+from pylab import *
 
 class Report:
     def __init__(self, capture: Capture, filename: str, summary: str):
@@ -35,12 +36,30 @@ class Report:
     def generate(self, param: str) -> None:
         """
         Generate graph and array
+        Attend un array
         """
         if param == "graph":
             # TODO: generate graph
-            graph = ""
+            x = []
+            y = []
+            """
+            Parse le summary pour récuperer les données
+            """
+            for i in range(len(self.summary)):
+                x.append(self.summary[i])
+                y.append(self.summary[i+1])
+                i = i+ 2
+            graph = pylab.pyplot
+            graph.bar(x,y)
+            logger(graph.show())
             self.graph = graph
         elif param == "array":
             # TODO: generate array
-            array = ""
+            array = []
+            """
+            Parse le summary pour récuperer les données
+            """
+            for i in range(len(self.summary)):
+                array.append(self.summary[i] + self.summary[i+1])
+                i = i + 2
             self.array = array

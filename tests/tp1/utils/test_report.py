@@ -58,7 +58,10 @@ def test_generate_graph():
     report.generate("graph")
 
     # Then
-    assert report.graph == ""  # Currently returns empty string
+    test = pylab.pyplot()
+    x = []
+    y = []
+    assert report.graph == test.bar(x,y)  # Currently returns empty string
 
 
 def test_generate_array():
@@ -69,7 +72,7 @@ def test_generate_array():
     report.generate("array")
 
     # Then
-    assert report.array == ""  # Currently returns empty string
+    assert report.array == []  # Currently returns empty string
 
 
 def test_generate_invalid_param():

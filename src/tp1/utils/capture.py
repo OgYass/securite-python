@@ -56,5 +56,5 @@ class Capture:
         """
         Generate summary
         """
-        summary = ""
+        summary = []
         return summary
