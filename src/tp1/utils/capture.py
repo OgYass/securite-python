@@ -7,7 +7,7 @@ from scapy.layers.inet import IP, TCP
 
 from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
-from src.tp1.utils.lib import choose_interface
+from src.tp1.utils.lib import choose_interface, contains_sql_injection
 
 
 
@@ -186,6 +186,37 @@ class Capture:
         logger.debug(f"{len(attacks)} port scan detected !")
         
         return attacks
+    
+    def _find_sql_injection(self) -> list[Attack]:
+        logger.debug("Starting search of SQL injection")
+        attacks: list[Attack] = []
+        
+        if self.captured_packets is None: return attacks
+
+        _detected = 0
+        
+        for pck in self.captured_packets:
+            if not (pck.haslayer(IP) and pck.haslayer(TCP)):
+                continue
+            
+            payload = pck[TCP].payload.load if pck[TCP].payload else "" 
+            
+            if len(payload) == 0:
+                continue
+            
+            logger.debug(f"TCP payload found : \"{payload}\"") # TODO remove
+            
+            if contains_sql_injection(payload):
+                _detected += 1
+                src = pck[IP].src
+                
+                logger.debug(f"SQL injection detected from {src}")
+                
+                attacks.append(Attack("sql_injection", src))
+                
+        logger.debug(f"{_detected} SQL injection detected !")
+        
+        return attacks
 
     def analyse(self, protocols: list[str] | str) -> None:
         """
@@ -212,6 +243,7 @@ class Capture:
         self.attacks += self._find_port_scan()
 
         # TODO Check SQL Injection
+        self.attacks += self._find_sql_injection()
 
         if len(self.attacks) > 0:
             logger.info(f"{len(self.attacks)} attacks detected out of {
