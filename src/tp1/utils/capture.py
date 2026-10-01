@@ -23,6 +23,8 @@ class Attack:
         
     def __str__(self) -> str:
         return f"({self.type}, {self.attacker})"
+    
+    __repr__ = __str__
 
 
 Protocols = dict[str, int]
@@ -122,42 +124,37 @@ class Capture:
 
         return filtered
 
-    def _find_arp_spoofing(self, protocols: list[str] | None = None) -> list[Attack]:
+    def _find_arp_spoofing(self) -> list[Attack]:
         logger.debug("Starting search of arp spoofing")
         attacks: list[Attack] = []
         
         if self.captured_packets is None : return attacks
         
         _detected = 0
+        _arp_count = 0
         
         arp_table: dict[str, str] = {}
-        
-        all_protocols: list[str] = ["ARP"] + (protocols or [])
-
-        packets_to_check: list[Packet] = self.captured_packets.filter(lambda x: any(x.haslayer(p) for p in all_protocols)).res
                         
 
-        for pck in packets_to_check:
-          if pck.haslayer(ARP):
-            
-            _arp_l = pck.getlayer(ARP)
-            if isinstance(_arp_l, ARP):
-              arp_l: ARP = _arp_l
-              mac, src = arp_l.hwsrc, arp_l.psrc
+        for pck in self.captured_packets:
+            if pck.haslayer(ARP):
+                _arp_count += 1
+                _arp_l = pck.getlayer(ARP)
+                if isinstance(_arp_l, ARP):
+                    arp_l: ARP = _arp_l
+                    mac, src = arp_l.hwsrc, arp_l.psrc
+                    
+                    if arp_table.get(src, mac) == mac:
+                        arp_table[src] = mac 
+                    
+                    else: 
+                        _detected += 1
+                        
+                        logger.debug(f"ARP Spoofing detected from {mac}")
+                                                                        
+                        attacks.append(Attack("arp", mac))
               
-              if arp_table.get(mac, src) == src:
-                arp_table[mac] = src 
-                break
-              
-              else: 
-                _detected += 1
-                
-                logger.debug(f"ARP Spoofing : {mac}")
-                self.attacks.append(Attack("arp", mac))
-              
-        logger.debug(f"{_detected} out of {len(packets_to_check)} ARP Spoofing detected !")
-                            
-        
+        logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
 
         return attacks
 
@@ -180,7 +177,7 @@ class Capture:
 
         # TODO Check ARP Spoofing
         protocols_set: list[str] = [protocols] if isinstance(protocols, str) else protocols
-        self._find_arp_spoofing(protocols_set)
+        self.attacks += self._find_arp_spoofing()
 
         # TODO Check Port Scan
 
