@@ -9,6 +9,7 @@ from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
 from src.tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
 
+import inspect
 
 
 class Attack:
@@ -134,7 +135,6 @@ class Capture:
         return filtered
 
     def _find_arp_spoofing(self) -> list[Attack]:
-        logger.debug("Starting search of arp spoofing")
         attacks: list[Attack] = []
         
         if self.captured_packets is None : return attacks
@@ -168,8 +168,6 @@ class Capture:
         return attacks
 
     def _find_port_scan(self, threshold: int = 20) -> list[Attack]:
-        logger.debug("Starting search of port scan")
-        
         attacks: list[Attack] = []
         
         if self.captured_packets is None: return attacks
@@ -195,7 +193,6 @@ class Capture:
         return attacks
     
     def _find_sql_injection(self) -> list[Attack]:
-        logger.debug("Starting search of SQL injection")
         attacks: list[Attack] = []
         
         if self.captured_packets is None: return attacks
@@ -211,8 +208,6 @@ class Capture:
             if len(payload) == 0:
                 continue
             
-            logger.debug(f"TCP payload found : \"{payload}\"") # TODO remove
-            
             if contains_sql_injection(payload):
                 flags = find_flags(payload)
                 
@@ -225,7 +220,7 @@ class Capture:
                 _detected += 1
                 src = pck[IP].src
                 
-                logger.debug(f"SQL injection detected from {src}")
+                logger.debug(f"SQL injection ({src}:{pck[TCP].sport} -> {pck[IP].dst}:{pck[TCP].dport})")
                 
                 attacks.append(Attack("sql_injection", src))
                 
@@ -291,6 +286,9 @@ class Capture:
         if len(self.attacks) > 0:
             logger.info(f"{len(self.attacks)} attacks detected out of {
                         len(self.captured_packets or [])}")
+            
+            
+        self._is_analyse_done = True
 
         self.summary = self._gen_summary()
 
@@ -308,6 +306,11 @@ class Capture:
 
         if not self._is_analyse_done:
             logger.warn("Summary generation started without the analyse done")
+            
         summary = Summary(self._protocols, self.attacks, self.flag or "")
+        
+        _caller = inspect.stack()[1].function
+        
+        logger.debug(f"summary generated : \n==== Summary ====\n{summary}\n====\n (from func {_caller})")
 
         return summary

@@ -10,9 +10,8 @@ def main():
     capture.capture_traffic()
     capture.analyse("tcp")
     
-    capture._gen_summary()
     summary = capture.get_summary()
-    logger.debug("summary : {}".format(summary))
+    # logger.debug("summary : {}".format(summary))
 
     filename = "report.pdf"
     # report = Report(capture, filename, summary)
