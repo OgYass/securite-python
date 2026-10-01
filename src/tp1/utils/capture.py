@@ -1,11 +1,11 @@
 from scapy.all import sniff
-
-from scapy.packet import Packet 
+from scapy.packet import Packet
 from scapy.plist import PacketList
 
-from src.tp1.utils.lib import choose_interface
 from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
+from src.tp1.utils.lib import choose_interface
+
 
 class Attack:
     

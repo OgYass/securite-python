@@ -1,7 +1,7 @@
+from scapy.config import conf
+
 from src.tp1.utils.args import Args
 
-from scapy.config import conf
-from src.tp1.utils.config import logger
 
 def choose_interface() -> str:
     """

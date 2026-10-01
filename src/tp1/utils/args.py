@@ -1,8 +1,6 @@
 import argparse
 from dataclasses import dataclass
 
-
-
 parser = argparse.ArgumentParser("PySec")
 
 parser.add_argument("--pcap", "-p", help="The pcap file you wish to input", type=str)
