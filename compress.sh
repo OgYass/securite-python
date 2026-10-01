@@ -1,1 +1,1 @@
-zip -r ../projet.zip . -x '.venv/*' '*__pycache__*' '.idea/*' '.vscode/*' '.*_cache/*'
+zip -r ../projet.zip . -x '.venv/*' '*__pycache__*' '.idea/*' '.vscode/*' '.*_cache/*' 'sample.pcap'
