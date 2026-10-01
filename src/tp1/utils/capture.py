@@ -117,9 +117,12 @@ class Capture:
     def _find_arp_spoofing(self, protocols: list[str] | None = None) -> list[Attack]:
         attacks: list[Attack] = []
         
+        if self.captured_packets is None : return attacks
+        
         arp_table: dict[str, str] = {}
 
         packets_to_check: list[Packet] = self._filter_packets(protocols)
+                        
 
         for pck in packets_to_check:
           pck.hasLayer() # TODO completer
