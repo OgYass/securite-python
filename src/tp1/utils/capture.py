@@ -95,6 +95,8 @@ class Capture:
             name = proto.__name__
             self._protocols[name] = self._protocols.get(name, 0) + 1
 
+            # TODO Capture HTTP and ETHERNET
+
     def capture_traffic(self) -> None:
         """
         Capture network traffic from an interface
@@ -154,7 +156,7 @@ class Capture:
 
         arp_table: dict[str, str] = {}
 
-        for pck in self.captured_packets:
+        for pck in self.captured_packets:  # TODO Correct function to give best result
             if pck.haslayer(ARP):
                 _arp_count += 1
                 _arp_l = pck.getlayer(ARP)
