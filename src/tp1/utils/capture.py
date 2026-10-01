@@ -185,7 +185,7 @@ class Capture:
 
         logger.debug(f"{len(attacks)} port scan detected !")
         
-        return []
+        return attacks
 
     def analyse(self, protocols: list[str] | str) -> None:
         """
