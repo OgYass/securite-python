@@ -57,6 +57,8 @@ class Summary:
 
 
 class Capture:
+    _LAYER_ALIASES = {"Ether": "ETHERNET"}
+
     def __init__(self, timeout: int = 5, pcap_file: str | None = None, interface: str | None = None) -> None:
         self.interface: str = interface or choose_interface()
         """Interface to sniff if no pcap
@@ -91,8 +93,9 @@ class Capture:
 
     def _handle_packet(self, pkt: Packet) -> None:
         # logger.debug(f"{pkt.summary()}")
-        for proto in pkt.layers():
-            name = proto.__name__
+        names = {Capture._LAYER_ALIASES.get(p.__name__, p.__name__) for p in pkt.layers()}
+
+        for name in names:
             self._protocols[name] = self._protocols.get(name, 0) + 1
 
             # TODO Capture HTTP and ETHERNET
@@ -236,8 +239,6 @@ class Capture:
 
             if contains_sql_injection(payload):
                 flags = find_flags(payload)
-
-                # TODO Test before remove and rely on _find_flag
                 if len(flags) == 1:
                     self.flag = flags[0]
                 elif len(flags) > 1:
@@ -299,13 +300,10 @@ class Capture:
         logger.debug(f"All protocols: {all_protocols}")
         logger.debug(f"Sorted protocols: {sort}")
 
-        # TODO Check ARP Spoofing
         self.attacks += self._find_arp_spoofing()
 
-        # TODO Check Port Scan
         self.attacks += self._find_port_scan()
 
-        # TODO Check SQL Injection
         self.attacks += self._find_sql_injection()
 
         if len(self.attacks) > 0:

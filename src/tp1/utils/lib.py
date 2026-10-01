@@ -56,8 +56,8 @@ def _find_pattern(
         if isinstance(text, bytes):
             text = text.decode(errors="ignore")
 
-            for p in pattern:
-                for found in p.findall(text):
-                    result.append(found)
+        for p in pattern:
+            for found in p.findall(text):
+                result.append(found)
 
     return result
