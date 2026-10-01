@@ -1,7 +1,10 @@
+from reportlab.platypus import Table
+
 from tp1.utils.capture import Capture, Summary
-from tp1.utils.logger import logger
-import numpy as np
+#from tp1.utils.logger import logger
 import matplotlib.pyplot as pylab
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.pdfgen import canvas
 import json
 
 class Report:
@@ -11,18 +14,22 @@ class Report:
         self.title = "TITRE DU RAPPORT"
         self.summary = summary
         self.array = []
-        self.graph = pylab.plot()
+        self.graph = pylab
         self.json = {}
 
     def concat_report(self) -> str:
         """
         Concat all data in report
         """
+        pdf = canvas.Canvas(self.filename)
+        pdf.setTitle(self.title)
         content = ""
-        content += self.title
-        content += self.summary
-        content += self.array
-        content += self.graph
+        content += json.dumps(self.summary.to_dict())
+        t = Table(self.array)
+
+        pdf.drawString(100,400,content)
+        #content += self.title
+        #content += self.summary
 
         return content
 
@@ -41,31 +48,31 @@ class Report:
         Generate graph and array
         """
         if param == "graph":
+
             x,y = []
-            """
+            """ 
             Parse le summary pour récuperer les données
             """
-            for i in self.summary.protocols:
+            for i in json.dumps(self.summary.to_dict()["protocols"]):
+                print(i)
                 x.append(i[0])
                 y.append(int(i[1]))
             graph = pylab.bar(x,y)
-            logger("graph output",graph)
+            #logger("graph output",graph)
             self.graph = graph
         elif param == "array":
-            array = [[protocol, count]]
+            array = [["protocol", "count"]]
             """
             Parse le summary pour récuperer les données
             """
-            for i in self.summary.protocols:
-                array.append(i[0],int(i[1]))
-            logger("array output",array)
+            for i in self.summary.to_dict()["protocols"]:
+                array.append([i[0],i[1]])
+            #logger("array output",array)
             self.array = array
 
     def generate_json(self) -> None:
-        json_output = {"protocols":{},"attacks": [],"flag": str}
-        for couple in self.summary.protocols:
-            json_output["protocols"].append({couple[0]: int(couple[1])})
-        for attacks in self.summary.attacks:
-            json_output["attacks"].append({"type": attacks["type"], "attacker":attacks["attacker"]})
-        json_output["flag"] = self.summary.flag
+        dictionary = self.summary.to_dict()
+        json_output = {"protocols": dictionary["protocols"],
+                       "attacks": dictionary["attacks"],
+                       "flag": dictionary["flag"]}
         self.json = json.dumps(json_output)

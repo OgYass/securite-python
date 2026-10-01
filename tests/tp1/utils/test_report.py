@@ -1,5 +1,6 @@
 from unittest.mock import patch, mock_open, MagicMock
 from src.tp1.utils.report import Report
+from matplotlib import pylab
 
 
 def test_report_init():
@@ -58,10 +59,9 @@ def test_generate_graph():
     report.generate("graph")
 
     # Then
-    test = pylab.pyplot()
-    x = []
-    y = []
-    assert report.graph == test.bar(x,y)  # Currently returns empty string
+    x = [str]
+    y = [int]
+    assert report.graph == pylab.bar(x,y)  # Currently returns empty string
 
 
 def test_generate_array():
