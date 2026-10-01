@@ -1,11 +1,13 @@
 from scapy.all import sniff
 from scapy.packet import Packet
 from scapy.plist import PacketList
+from scapy.layers.l2 import ARP
+from scapy.layers.inet import IP, TCP
+
 
 from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
 from src.tp1.utils.lib import choose_interface
-from scapy.layers.l2 import ARP
 
 
 
@@ -158,6 +160,33 @@ class Capture:
 
         return attacks
 
+    def _find_port_scan(self, threshold: int = 20) -> list[Attack]:
+        logger.debug("Starting search of port scan")
+        
+        attacks: list[Attack] = []
+        
+        if self.captured_packets is None: return attacks
+        
+        # (ip src, ip dst) -> ports 
+        scanned_ports: dict[tuple[str, str], set[int]] = {}
+        
+        for pck in self.captured_packets:
+            if pck.haslayer(IP) and pck.haslayer(TCP):
+                ip_l, tcp_l = pck[IP], pck[TCP]
+                
+                if tcp_l.flags == "S":
+                    key = (ip_l.src, ip_l.dst)
+                    scanned_ports.setdefault(key, set()).add(tcp_l.dport)
+                    
+        for (src, dst), ports in scanned_ports.items():
+            if len(ports) >= threshold:
+                logger.debug(f"Port scan detected from {src} on {dst} ({len(ports)} ports)")
+                attacks.append(Attack("port_scan", src))
+
+        logger.debug(f"{len(attacks)} port scan detected !")
+        
+        return []
+
     def analyse(self, protocols: list[str] | str) -> None:
         """
         Analyse all captured data and return statement
@@ -180,6 +209,7 @@ class Capture:
         self.attacks += self._find_arp_spoofing()
 
         # TODO Check Port Scan
+        self.attacks += self._find_port_scan()
 
         # TODO Check SQL Injection
 
