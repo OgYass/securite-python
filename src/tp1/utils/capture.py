@@ -7,7 +7,7 @@ from scapy.layers.inet import IP, TCP
 
 from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
-from src.tp1.utils.lib import choose_interface, contains_sql_injection
+from src.tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
 
 
 
@@ -65,6 +65,10 @@ class Capture:
 
         self._protocols: Protocols = {}
         self._timeout: int = timeout
+        
+        self._is_capture_done: bool = False 
+        self._is_analyse_done: bool = False 
+                        
 
     def _handle_packet(self, pkt: Packet) -> None:
         # logger.debug(f"{pkt.summary()}")
@@ -76,7 +80,9 @@ class Capture:
         """
         Capture network traffic from an interface
         """
-
+        self._is_analyse_done = False 
+        self._is_capture_done = False 
+                        
         packets: PacketList | None = None
 
         if self.is_offline:
@@ -91,8 +97,9 @@ class Capture:
             packets = sniff(prn=self._handle_packet,
                             iface=self.interface, timeout=self._timeout)
 
-        self.interface = ""
         self.captured_packets = packets
+        
+        self._is_capture_done = True
 
         logger.info(f"{len(self.captured_packets or [])} packets captured")
 
@@ -207,6 +214,14 @@ class Capture:
             logger.debug(f"TCP payload found : \"{payload}\"") # TODO remove
             
             if contains_sql_injection(payload):
+                flags = find_flags(payload)
+                
+                # TODO Test before remove and rely on _find_flag
+                if len(flags) == 1:
+                    self.flag = flags[0]
+                elif len(flags) > 1:
+                    logger.warn(f"More than one flag has been found in payload \"{payload}\"")
+                
                 _detected += 1
                 src = pck[IP].src
                 
@@ -217,6 +232,30 @@ class Capture:
         logger.debug(f"{_detected} SQL injection detected !")
         
         return attacks
+
+    def _find_flag(self) -> str | None:
+        raise NotImplemented()
+    
+        logger.debug("Starting search of SQL injection")
+        
+        if self.captured_packets is None: return 
+        
+        flags: list[str] = []
+        
+        for pck in self.captured_packets:
+            if not (pck.haslayer(IP) and pck.haslayer(TCP)):
+                continue
+            
+            payload = pck[TCP].payload.load if pck[TCP].payload else "" 
+                        
+            if len(payload) == 0:
+                continue
+            
+            flags += find_flags(payload)
+        
+        if len(flags) != 1: return 
+        
+        return flags[0]
 
     def analyse(self, protocols: list[str] | str) -> None:
         """
@@ -230,6 +269,10 @@ class Capture:
         attaquante.
         Sinon a cher que tout va bien
         """
+        
+        if not self._is_capture_done:
+            logger.warn("Analyse started without the capture done")
+        
         all_protocols = self.get_all_protocols()
         sort = self.sort_network_protocols()
         logger.debug(f"All protocols: {all_protocols}")
@@ -262,6 +305,9 @@ class Capture:
         """
         Generate summary
         """
+
+        if not self._is_analyse_done:
+            logger.warn("Summary generation started without the analyse done")
         summary = Summary(self._protocols, self.attacks, self.flag or "")
 
         return summary
