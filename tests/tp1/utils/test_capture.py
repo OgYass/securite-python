@@ -12,18 +12,18 @@ def test_capture_init():
     assert capture.interface is str
     assert capture.summary == None
     assert capture.attacks == []
-    assert capture.flag == None 
-    
-    assert capture.captured_packets == None 
+    assert capture.flag == None
+
+    assert capture.captured_packets == None
     assert capture._protocols == {}
     assert capture._timeout == 20
-    
+
     assert capture2._timeout == 5
 
 
 def test_capture_pcap():
     # Given
-    capture = Capture(pcap_file='sample.pcap')
+    capture = Capture(pcap_file="sample.pcap")
 
     # When
     capture.capture_traffic()
@@ -31,11 +31,12 @@ def test_capture_pcap():
     # Then
     # This is a minimal test since the method doesn't do much yet
     assert capture.interface == ""
-    assert capture.is_offline == True
+    assert capture.is_offline
     assert capture.captured_packets
-    
+
+
 def test_capture_interface():
-  pass # TODO
+    pass  # TODO
 
 
 def test_sort_network_protocols():
@@ -83,7 +84,7 @@ def test_analyse():
 def test_get_summary():
     # Given
     capture = Capture()
-    # capture.summary = "Test summary" 
+    # capture.summary = "Test summary"
     # TODO Corriger
 
     # When

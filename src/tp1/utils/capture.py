@@ -26,14 +26,11 @@ class Attack:
         self.attacker = attacker
 
     def to_dict(self) -> dict[str, str]:
-        return {
-            "type": self.type,
-            "attacker": self.attacker
-        }
-        
+        return {"type": self.type, "attacker": self.attacker}
+
     def __str__(self) -> str:
         return f"({self.type}, {self.attacker})"
-    
+
     __repr__ = __str__
 
 
@@ -41,18 +38,16 @@ Protocols = dict[str, int]
 
 
 class Summary:
-    def __init__(self, protocols: Protocols | None = None, attacks: list[Attack] | None = None, flag: str = "") -> None:
+    def __init__(
+        self, protocols: Protocols | None = None, attacks: list[Attack] | None = None, flag: str = ""
+    ) -> None:
         self.protocols = protocols or {}
         self.attacks = attacks or []
         self.flag = flag
 
     def to_dict(self) -> dict[str, Protocols | str | list[Attack]]:
-        return {
-            "protocols": self.protocols,
-            "attacks": self.attacks,
-            "flag": self.flag
-        }
-        
+        return {"protocols": self.protocols, "attacks": self.attacks, "flag": self.flag}
+
     def __str__(self) -> str:
         return f"Protocols : {self.protocols}\nattacks : {self.attacks}\nFlag : {self.flag}"
 
@@ -86,10 +81,9 @@ class Capture:
 
         self._protocols: Protocols = {}
         self._timeout: int = timeout
-        
-        self._is_capture_done: bool = False 
-        self._is_analyse_done: bool = False 
-                        
+
+        self._is_capture_done: bool = False
+        self._is_analyse_done: bool = False
 
     def _handle_packet(self, pkt: Packet) -> None:
         # logger.debug(f"{pkt.summary()}")
@@ -101,31 +95,32 @@ class Capture:
         """
         Capture network traffic from an interface
         """
-        if self._is_capture_done: logger.warn("Capture launched a second time")
-        
-        self._is_analyse_done = False 
-        self._is_capture_done = False 
-                        
+        if self._is_capture_done:
+            logger.warn("Capture launched a second time")
+
+        self._is_analyse_done = False
+        self._is_capture_done = False
+
         packets: PacketList | None = None
 
         if self.is_offline:
             logger.info(f"Capture offline of {Args.pcap_file}")
-            packets = sniff(prn=self._handle_packet,
-                            offline=self.pcap_file, timeout=self._timeout)
+            packets = sniff(prn=self._handle_packet, offline=self.pcap_file, timeout=self._timeout)
         else:
             interface = self.interface
-            logger.info(f"Capture traffic from interface {interface} for {self._timeout} seconds (Press Ctrl + C to interrupt)")
+            logger.info(
+                f"Capture traffic from interface {interface} for {self._timeout} seconds (Press Ctrl + C to interrupt)"
+            )
 
-            packets = sniff(prn=self._handle_packet,
-                            iface=self.interface, timeout=self._timeout)
+            packets = sniff(prn=self._handle_packet, iface=self.interface, timeout=self._timeout)
 
         self.captured_packets = packets
-        
-        self._is_capture_done = True
-        
-        l = len(self.captured_packets or [])
 
-        logger.info(f"{l if l > 0 else 'no'} packet{'s' if l > 1 else ''} captured")
+        self._is_capture_done = True
+
+        le = len(self.captured_packets or [])
+
+        logger.info(f"{le if le > 0 else 'no'} packet{'s' if le > 1 else ''} captured")
 
     def sort_network_protocols(self) -> list[str]:
         """
@@ -140,20 +135,20 @@ class Capture:
         return self._protocols.copy()
 
     def _find_arp_spoofing(self) -> list[Attack]:
-        """Search for ARP spoofing by building an arp table 
+        """Search for ARP spoofing by building an arp table
 
         Returns:
             list[Attack]: List of all attacks if found
         """
         attacks: list[Attack] = []
-        
-        if self.captured_packets is None : return attacks
-        
+
+        if self.captured_packets is None:
+            return attacks
+
         _detected = 0
         _arp_count = 0
-        
+
         arp_table: dict[str, str] = {}
-                        
 
         for pck in self.captured_packets:
             if pck.haslayer(ARP):
@@ -162,17 +157,17 @@ class Capture:
                 if isinstance(_arp_l, ARP):
                     arp_l: ARP = _arp_l
                     mac, src = arp_l.hwsrc, arp_l.psrc
-                    
+
                     if arp_table.get(src, mac) == mac:
-                        arp_table[src] = mac 
-                    
-                    else: 
+                        arp_table[src] = mac
+
+                    else:
                         _detected += 1
-                        
+
                         logger.debug(f"ARP Spoofing detected from {mac}")
-                                                                        
+
                         attacks.append(Attack("arp_spoofing", mac))
-              
+
         logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
 
         return attacks
@@ -187,92 +182,94 @@ class Capture:
             list[Attack]: List of port scans detected, return empty list if none found
         """
         attacks: list[Attack] = []
-        
-        if self.captured_packets is None: return attacks
-        
-        # (ip src, ip dst) -> ports 
+
+        if self.captured_packets is None:
+            return attacks
+
+        # (ip src, ip dst) -> ports
         scanned_ports: dict[tuple[str, str], set[int]] = {}
-        
+
         for pck in self.captured_packets:
             if pck.haslayer(IP) and pck.haslayer(TCP):
                 ip_l, tcp_l = pck[IP], pck[TCP]
-                
+
                 if tcp_l.flags == "S":
                     key = (ip_l.src, ip_l.dst)
                     scanned_ports.setdefault(key, set()).add(tcp_l.dport)
-                    
+
         for (src, dst), ports in scanned_ports.items():
             if len(ports) >= threshold:
                 logger.debug(f"Port scan detected from {src} on {dst} ({len(ports)} ports)")
                 attacks.append(Attack("port_scan", src))
 
         logger.debug(f"{len(attacks)} port scan detected !")
-        
+
         return attacks
-    
+
     def _find_sql_injection(self) -> list[Attack]:
         """Search for SQL injection in the captured packets
 
         Returns:
-            list[Attack]: List of attacks detected, return empty list not found 
+            list[Attack]: List of attacks detected, return empty list not found
         """
         attacks: list[Attack] = []
-        
-        if self.captured_packets is None: return attacks
+
+        if self.captured_packets is None:
+            return attacks
 
         _detected = 0
-        
+
         for pck in self.captured_packets:
             if not (pck.haslayer(IP) and pck.haslayer(TCP)):
                 continue
-            
-            payload = pck[TCP].payload.load if pck[TCP].payload else "" 
-            
+
+            payload = pck[TCP].payload.load if pck[TCP].payload else ""
+
             if len(payload) == 0:
                 continue
-            
+
             if contains_sql_injection(payload):
                 flags = find_flags(payload)
-                
+
                 # TODO Test before remove and rely on _find_flag
                 if len(flags) == 1:
                     self.flag = flags[0]
                 elif len(flags) > 1:
-                    logger.warn(f"More than one flag has been found in payload \"{payload}\"")
-                
+                    logger.warn(f'More than one flag has been found in payload "{payload}"')
+
                 _detected += 1
                 src = pck[IP].src
-                
+
                 logger.debug(f"SQL injection ({src}:{pck[TCP].sport} -> {pck[IP].dst}:{pck[TCP].dport})")
-                
+
                 attacks.append(Attack("sql_injection", src))
-                
+
         logger.debug(f"{_detected} SQL injection detected !")
-        
+
         return attacks
 
     def _find_flag(self) -> str | None:
-        raise NotImplemented()
-    
+        raise NotImplementedError()
+
         # logger.debug("Starting search of SQL injection")
-        
-        # if self.captured_packets is None: return 
-        
+
+        # if self.captured_packets is None: return
+
         # flags: list[str] = []
-        
+
         # for pck in self.captured_packets:
         #     if not (pck.haslayer(IP) and pck.haslayer(TCP)):
         #         continue
-            
-        #     payload = pck[TCP].payload.load if pck[TCP].payload else "" 
-                        
+
+        #     payload = pck[TCP].payload.load if pck[TCP].payload else ""
+
         #     if len(payload) == 0:
         #         continue
-            
+
         #     flags += find_flags(payload)
-        
-        # if len(flags) != 1: return 
-        
+
+        # if len(flags) != 1: return
+
         # return flags[0]
 
     def analyse(self, protocols: list[str] | str) -> None:
@@ -287,17 +284,16 @@ class Capture:
         attaquante.
         Sinon a cher que tout va bien
         """
-        
+
         if not self._is_capture_done:
             logger.warn("Analyse started without the capture done")
-        
+
         all_protocols = self.get_all_protocols()
         sort = self.sort_network_protocols()
         logger.debug(f"All protocols: {all_protocols}")
         logger.debug(f"Sorted protocols: {sort}")
 
         # TODO Check ARP Spoofing
-        protocols_set: list[str] = [protocols] if isinstance(protocols, str) else protocols
         self.attacks += self._find_arp_spoofing()
 
         # TODO Check Port Scan
@@ -307,10 +303,8 @@ class Capture:
         self.attacks += self._find_sql_injection()
 
         if len(self.attacks) > 0:
-            logger.info(f"{len(self.attacks)} attacks detected out of {
-                        len(self.captured_packets or [])}")
-            
-            
+            logger.info(f"{len(self.attacks)} attacks detected out of {len(self.captured_packets or [])}")
+
         self._is_analyse_done = True
 
         self.summary = self._gen_summary()
@@ -329,11 +323,11 @@ class Capture:
 
         if not self._is_analyse_done:
             logger.warn("Summary generation started without the analyse done")
-            
+
         summary = Summary(self._protocols, self.attacks, self.flag or "")
-        
+
         _caller = inspect.stack()[1].function
-        
+
         logger.debug(f"summary generated : \n==== Summary ====\n{summary}\n====\n (from func {_caller})")
 
         return summary

@@ -18,12 +18,12 @@ class Args:
     Parsed and validated command line arguments.
     """
 
-    pcap_file:str | None = args.pcap or None
+    pcap_file: str | None = args.pcap or None
     """Path of the pcap file to analyse, ``None`` for a live capture."""
-    
-    iface:str | None = args.pcap
+
+    iface: str | None = args.pcap
     """Interface to listen to, ``None`` for default."""
-    
+
     report_path: str | None = args.out
     """"Path for the report json, if None we don't need to generate one"""
 

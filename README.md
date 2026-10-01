@@ -2,7 +2,7 @@
 
 ## Description
 
-Programme minimaliste de détection de packet suspect en python 
+Programme minimaliste de détection de packet suspect en python
 
 ## Native
 
@@ -23,24 +23,24 @@ Lancer le projet :
 ```bash
 poetry run tp1
 poetry run tp2
-poetry run tp3 
+poetry run tp3
 
 ```
 
 ## Container docker
 
-### Requis 
+### Requis
 
 - docker
 
-### Build 
+### Build
 
-```bash 
+```bash
 docker build -t <nom> .
 ```
 ```
 
-## Lacement 
+## Lacement
 
 ```bash
 docker run -it <nom>
