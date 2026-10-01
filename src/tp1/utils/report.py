@@ -11,7 +11,7 @@ class Report:
         self.title = "TITRE DU RAPPORT"
         self.summary = summary
         self.array = []
-        self.graph = pylab.pyplot()
+        self.graph = pylab.plot()
         self.json = {}
 
     def concat_report(self) -> str:
@@ -39,34 +39,32 @@ class Report:
     def generate(self, param: str) -> None:
         """
         Generate graph and array
-        Attend un array
         """
         if param == "graph":
-            # TODO: generate graph
             x,y = []
             """
             Parse le summary pour récuperer les données
             """
-            for i in range(0,len(self.summary),2):
-                x.append(self.summary[i])
-                y.append(int(self.summary[i+1]))
+            for i in self.summary.protocols:
+                x.append(i[0])
+                y.append(int(i[1]))
             graph = pylab.bar(x,y)
+            logger("graph output",graph)
             self.graph = graph
         elif param == "array":
-            # TODO: generate array
             array = [[protocol, count]]
             """
             Parse le summary pour récuperer les données
             """
-            for i in range(0,len(self.summary),2):
-                array.append([self.summary[i],int(self.summary[i+1])])
-
+            for i in self.summary.protocols:
+                array.append(i[0],int(i[1]))
+            logger("array output",array)
             self.array = array
 
     def generate_json(self) -> None:
         json_output = {"protocols":{},"attacks": [],"flag": str}
         for couple in self.summary.protocols:
-            json_output["protocols"].append({"protocol": couple[0], "count": int(couple[1])})
+            json_output["protocols"].append({couple[0]: int(couple[1])})
         for attacks in self.summary.attacks:
             json_output["attacks"].append({"type": attacks["type"], "attacker":attacks["attacker"]})
         json_output["flag"] = self.summary.flag
