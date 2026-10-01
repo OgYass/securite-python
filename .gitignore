@@ -10,3 +10,4 @@ report.pdf
 app.log
 .env
 .vscode/
+out/
