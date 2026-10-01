@@ -45,8 +45,12 @@ class Summary:
         self.attacks = attacks or []
         self.flag = flag
 
-    def to_dict(self) -> dict[str, Protocols | str | list[Attack]]:
-        return {"protocols": self.protocols, "attacks": self.attacks, "flag": self.flag}
+    def to_dict(self) -> dict[str, Protocols | str | list[dict[str, str]]]:
+        return {
+            "protocols": self.protocols,
+            "attacks": [a.to_dict() for a in self.attacks],
+            "flag": self.flag,
+        }
 
     def __str__(self) -> str:
         return f"Protocols : {self.protocols}\nattacks : {self.attacks}\nFlag : {self.flag}"
