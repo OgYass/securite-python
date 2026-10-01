@@ -1,11 +1,11 @@
-from tp1.utils.capture import Capture
+from tp1.utils.capture import Capture, Summary
 from tp1.utils.logger import logger
 import numpy as np
 import matplotlib.pyplot as pylab
 import json
 
 class Report:
-    def __init__(self, capture: Capture, filename: str, summary: str):
+    def __init__(self, capture: Capture, filename: str, summary: Summary):
         self.capture = capture
         self.filename = filename
         self.title = "TITRE DU RAPPORT"
@@ -65,16 +65,9 @@ class Report:
 
     def generate_json(self) -> None:
         json_output = {"protocols":{},"attacks": [],"flag": str}
-        for couple in self.array:
-            json_output["protocols"].append({"protocol": couple[0], "count": couple[1]})
-        # TODO: recuperer la liste des attacks depuis summary(?)
-        for attacks in self.summary:
-            json_output["attacks"].append({"type": attacks[0], "attacker":attacks[1]})
-        json_output["flag"] = self.get_flag()
+        for couple in self.summary.protocols:
+            json_output["protocols"].append({"protocol": couple[0], "count": int(couple[1])})
+        for attacks in self.summary.attacks:
+            json_output["attacks"].append({"type": attacks["type"], "attacker":attacks["attacker"]})
+        json_output["flag"] = self.summary.flag
         self.json = json.dumps(json_output)
-
-    def get_flag(self) -> str:
-        flag = ''
-        capture = self.capture
-        # TODO: trouver le flag
-        return flag
