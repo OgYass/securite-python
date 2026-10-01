@@ -15,10 +15,10 @@ def main():
     logger.debug("summary : {}".format(summary))
 
     filename = "report.pdf"
-    report = Report(capture, filename, summary)
-    report.generate("graph")
-    report.generate("array")
-    report.save(filename)
+    # report = Report(capture, filename, summary)
+    # report.generate("graph")
+    # report.generate("array")
+    # report.save(filename)
 
 
 if __name__ == "__main__":

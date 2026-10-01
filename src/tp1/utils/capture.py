@@ -5,6 +5,8 @@ from scapy.plist import PacketList
 from src.tp1.utils.args import Args
 from src.tp1.utils.config import logger
 from src.tp1.utils.lib import choose_interface
+from scapy.layers.l2 import ARP
+
 
 
 class Attack:
@@ -18,6 +20,9 @@ class Attack:
             "type": self.type,
             "attacker": self.attacker
         }
+        
+    def __str__(self) -> str:
+        return f"({self.type}, {self.attacker})"
 
 
 Protocols = dict[str, int]
@@ -35,6 +40,9 @@ class Summary:
             "attacks": self.attacks,
             "flag": self.flag
         }
+        
+    def __str__(self) -> str:
+        return f"Protocols : {self.protocols}\nattacks : {self.attacks}\nFlag : {self.flag}"
 
 
 class Capture:
@@ -55,7 +63,7 @@ class Capture:
         self._timeout: int = timeout
 
     def _handle_packet(self, pkt: Packet) -> None:
-        logger.debug(f"{pkt.summary()}")
+        # logger.debug(f"{pkt.summary()}")
         for proto in pkt.layers():
             name = proto.__name__
             self._protocols[name] = self._protocols.get(name, 0) + 1
@@ -115,21 +123,45 @@ class Capture:
         return filtered
 
     def _find_arp_spoofing(self, protocols: list[str] | None = None) -> list[Attack]:
+        logger.debug("Starting search of arp spoofing")
         attacks: list[Attack] = []
         
         if self.captured_packets is None : return attacks
         
+        _detected = 0
+        
         arp_table: dict[str, str] = {}
+        
+        all_protocols: list[str] = ["ARP"] + (protocols or [])
 
-        packets_to_check: list[Packet] = self._filter_packets(protocols)
+        packets_to_check: list[Packet] = self.captured_packets.filter(lambda x: any(x.haslayer(p) for p in all_protocols)).res
                         
 
         for pck in packets_to_check:
-          pck.hasLayer() # TODO completer
+          if pck.haslayer(ARP):
+            
+            _arp_l = pck.getlayer(ARP)
+            if isinstance(_arp_l, ARP):
+              arp_l: ARP = _arp_l
+              mac, src = arp_l.hwsrc, arp_l.psrc
+              
+              if arp_table.get(mac, src) == src:
+                arp_table[mac] = src 
+                break
+              
+              else: 
+                _detected += 1
+                
+                logger.debug(f"ARP Spoofing : {mac}")
+                self.attacks.append(Attack("arp", mac))
+              
+        logger.debug(f"{_detected} out of {len(packets_to_check)} ARP Spoofing detected !")
+                            
+        
 
         return attacks
 
-    def analyse(self, protocols: set[str]) -> None:
+    def analyse(self, protocols: list[str] | str) -> None:
         """
         Analyse all captured data and return statement
         Si un trafic est illégitime (exemple : Injection SQL, ARP
@@ -147,6 +179,8 @@ class Capture:
         logger.debug(f"Sorted protocols: {sort}")
 
         # TODO Check ARP Spoofing
+        protocols_set: list[str] = [protocols] if isinstance(protocols, str) else protocols
+        self._find_arp_spoofing(protocols_set)
 
         # TODO Check Port Scan
 
