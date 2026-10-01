@@ -1,3 +1,5 @@
+from typing import Literal
+
 from scapy.all import sniff
 from scapy.packet import Packet
 from scapy.plist import PacketList
@@ -13,8 +15,13 @@ import inspect
 
 
 class Attack:
+    def __init__(self, type: Literal["arp_spoofing", "port_scan", "sql_injection"], attacker: str):
+        """_summary_
 
-    def __init__(self, type: str, attacker: str):
+        Args:
+            type (Literal[&quot;arp_spoofing&quot;, &quot;port_scan&quot;, &quot;sql_injection&quot;]): Attack type
+            attacker (str): Attacker MAC or IP
+        """
         self.type = type
         self.attacker = attacker
 
@@ -164,7 +171,7 @@ class Capture:
                         
                         logger.debug(f"ARP Spoofing detected from {mac}")
                                                                         
-                        attacks.append(Attack("arp", mac))
+                        attacks.append(Attack("arp_spoofing", mac))
               
         logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
 
