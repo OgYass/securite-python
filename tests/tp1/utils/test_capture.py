@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from src.tp1.utils.capture import Capture
 
 
@@ -17,7 +18,7 @@ def test_capture_init():
     assert capture._protocols == {}
     assert capture._timeout == 20
     
-    assert capture._timeout == 5
+    assert capture2._timeout == 5
 
 
 def test_capture_pcap():
@@ -31,7 +32,7 @@ def test_capture_pcap():
     # This is a minimal test since the method doesn't do much yet
     assert capture.interface == ""
     assert capture.is_offline == True
-    assert capture.captured_packets != None # TODO Finir
+    assert capture.captured_packets
     
 def test_capture_interface():
   pass # TODO
