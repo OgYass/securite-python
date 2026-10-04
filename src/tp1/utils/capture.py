@@ -33,6 +33,14 @@ class Attack:
 
     __repr__ = __str__
 
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, Attack):
+            return False
+
+        other: Attack = value
+
+        return self.type == other.type and self.attacker == other.attacker
+
 
 Protocols = dict[str, int]
 
@@ -54,6 +62,14 @@ class Summary:
 
     def __str__(self) -> str:
         return f"Protocols : {self.protocols}\nattacks : {self.attacks}\nFlag : {self.flag}"
+
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, Summary):
+            return False
+
+        other: Summary = value
+
+        return self.attacks == other.attacks and self.flag == other.flag and self.protocols == other.protocols
 
 
 class Capture:
@@ -135,7 +151,7 @@ class Capture:
         """
         Sort and return all captured network protocols
         """
-        return [k for k, _ in sorted(self._protocols.items(), key=lambda i: i[1], reverse=True)]
+        return [k for k, _ in sorted(self._protocols.items(), key=lambda i: (-i[1], i[0]))]
 
     def get_all_protocols(self) -> Protocols:
         """
@@ -279,7 +295,7 @@ class Capture:
 
         # return flags[0]
 
-    def analyse(self, protocols: list[str] | str) -> None:
+    def analyse(self, protocols: list[str] | str | None = None) -> None:
         """
         Analyse all captured data and return statement
         Si un trafic est illégitime (exemple : Injection SQL, ARP
