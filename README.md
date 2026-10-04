@@ -2,8 +2,11 @@
 
 ## Description
 
+Programme minimaliste de détection de packet suspect en python
 
-## Installation
+## Native
+
+### Installation
 
 Installer les dépendances :
 
@@ -13,13 +16,32 @@ poetry lock
 poetry install
 ```
 
-## Utilisation
+### Utilisation
 
 Lancer le projet :
 
 ```bash
 poetry run tp1
 poetry run tp2
-poetry run tp3 
+poetry run tp3
 
+```
+
+## Container docker
+
+### Requis
+
+- docker
+
+### Build
+
+```bash
+docker build -t <nom> .
+```
+```
+
+## Lacement
+
+```bash
+docker run -it <nom>
 ```
