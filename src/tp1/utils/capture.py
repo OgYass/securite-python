@@ -191,7 +191,9 @@ class Capture:
 
                         logger.debug(f"ARP Spoofing detected from {mac}")
 
-                        attacks.append(Attack("arp_spoofing", mac))
+                        new_attack = Attack("arp_spoofing", mac)
+                        if new_attack not in attacks:
+                            attacks.append(new_attack)
 
         logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
 
@@ -271,30 +273,6 @@ class Capture:
 
         return attacks
 
-    def _find_flag(self) -> str | None:
-        raise NotImplementedError()
-
-        # logger.debug("Starting search of SQL injection")
-
-        # if self.captured_packets is None: return
-
-        # flags: list[str] = []
-
-        # for pck in self.captured_packets:
-        #     if not (pck.haslayer(IP) and pck.haslayer(TCP)):
-        #         continue
-
-        #     payload = pck[TCP].payload.load if pck[TCP].payload else ""
-
-        #     if len(payload) == 0:
-        #         continue
-
-        #     flags += find_flags(payload)
-
-        # if len(flags) != 1: return
-
-        # return flags[0]
-
     def analyse(self, protocols: list[str] | str | None = None) -> None:
         """
         Analyse all captured data and return statement
@@ -307,6 +285,8 @@ class Capture:
         attaquante.
         Sinon a cher que tout va bien
         """
+
+        self.attacks.clear()
 
         if not self._is_capture_done:
             logger.warn("Analyse started without the capture done")
