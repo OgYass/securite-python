@@ -6,14 +6,17 @@ from collections import Counter
 
 
 
-def get_data(data) :
+def get_data(path:str) -> dict :
     """
     Recupere et renvoi les datas d'un fichier
     """
-    data = open(data, 'rb').read()
+    data = get_file(path)
     metadata = get_metadata(data)
     return metadata
 
+def get_file(path) :
+    data = open(path, 'rb').read()
+    return data
 
 def get_metadata(data) -> dict:
     """
