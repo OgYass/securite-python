@@ -22,6 +22,7 @@ capstone = "^5.0.6"
 python-dotenv = "^1.2.1"
 matplotlib = "^3.11.2"
 reportlab = "^5.0.1"
+python-magic-standalone = "^0.4.28"
 
 [build-system]
 requires = ["poetry-core"]

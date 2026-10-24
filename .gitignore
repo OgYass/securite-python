@@ -12,3 +12,5 @@ app.log
 poetry.lock
 
 sample.pcap
+
+test.txt
