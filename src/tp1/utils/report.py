@@ -1,9 +1,7 @@
 from reportlab.platypus import Table
-
 from tp1.utils.capture import Capture, Summary
 #from tp1.utils.logger import logger
 import matplotlib.pyplot as pylab
-from reportlab.lib.pagesizes import letter, A4
 from reportlab.pdfgen import canvas
 import json
 
@@ -30,8 +28,8 @@ class Report:
         pdf.drawString(100,400,content)
         #content += self.title
         #content += self.summary
-
-        return content
+        pdf.save()
+        return str(pdf)
 
     def save(self, filename: str) -> None:
         """
@@ -49,7 +47,7 @@ class Report:
         """
         if param == "graph":
 
-            x,y = []
+            x,y = [],[]
             """ 
             Parse le summary pour récuperer les données
             """
@@ -57,8 +55,11 @@ class Report:
                 print(i)
                 x.append(i[0])
                 y.append(int(i[1]))
+            pylab.xlabel("protocols")
+            pylab.ylabel("count")
             graph = pylab.bar(x,y)
             #logger("graph output",graph)
+            pylab.savefig("tmp/graph.png")
             self.graph = graph
         elif param == "array":
             array = [["protocol", "count"]]

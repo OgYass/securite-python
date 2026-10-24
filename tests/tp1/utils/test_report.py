@@ -32,6 +32,7 @@ def test_concat_report():
     result = report.concat_report()
 
     # Then
+
     assert result == "Test TitleTest summaryTest ArrayTest Graph"
 
 
