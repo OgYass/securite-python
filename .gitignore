@@ -16,3 +16,4 @@ poetry.lock
 sample.pcap
 
 test.txt
+report.json
