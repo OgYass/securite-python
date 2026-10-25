@@ -8,8 +8,7 @@ parser.add_argument("--iface", "-i", help="The interface you wish to listen to",
 parser.add_argument("--out", "-o", help="File containing the report (json format)", type=str)
 parser.add_argument("--verbose", "-v", help="Enable verbose", action="store_true")
 
-
-args = parser.parse_args()
+args, _ = parser.parse_known_args()
 
 
 @dataclass(frozen=True)
@@ -21,7 +20,7 @@ class Args:
     pcap_file: str | None = args.pcap or None
     """Path of the pcap file to analyse, ``None`` for a live capture."""
 
-    iface: str | None = args.pcap
+    iface: str | None = args.iface
     """Interface to listen to, ``None`` for default."""
 
     report_path: str | None = args.out

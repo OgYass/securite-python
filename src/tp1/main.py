@@ -27,7 +27,7 @@ def main():
 
     logger.debug("summary : {}".format(summary))
 
-    filename = Args.report_path or "report.pdf"
+    filename = "report.pdf"
     report = Report(capture, filename, summary)
     # TODO FIX graph
     # report.generate("graph")

@@ -1,7 +1,7 @@
 # from reportlab.platypus import Table
+from tp1.utils.config import logger
 from tp1.utils.capture import Capture, Summary
 
-# from tp1.utils.logger import logger
 import matplotlib.pyplot as pylab
 from reportlab.pdfgen import canvas
 import json
@@ -54,7 +54,7 @@ class Report:
             Parse le summary pour récuperer les données
             """
             for i in json.dumps(self.summary.to_dict()["protocols"]):
-                print(i)
+                logger.debug(i)
                 x.append(i[0])
                 y.append(int(i[1]))
             pylab.xlabel("protocols")

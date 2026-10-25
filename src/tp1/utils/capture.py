@@ -7,9 +7,9 @@ from scapy.layers.l2 import ARP
 from scapy.layers.inet import IP, TCP
 
 
-from src.tp1.utils.args import Args
-from src.tp1.utils.config import logger
-from src.tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
+from tp1.utils.args import Args
+from tp1.utils.config import logger
+from tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
 
 import inspect
 
@@ -57,7 +57,7 @@ class Summary:
 
 
 class Capture:
-    _LAYER_ALIASES = {"Ether": "ETHERNET"}
+    _LAYER_ALIASES = {"Ether": "Ethernet"}
 
     def __init__(self, timeout: int = 5, pcap_file: str | None = None, interface: str | None = None) -> None:
         self.interface: str = interface or choose_interface()
@@ -159,6 +159,8 @@ class Capture:
 
         arp_table: dict[str, str] = {}
 
+        _attackers: set[str] = set()
+
         for pck in self.captured_packets:  # TODO Correct function to give best result
             if pck.haslayer(ARP):
                 _arp_count += 1
@@ -170,12 +172,13 @@ class Capture:
                     if arp_table.get(src, mac) == mac:
                         arp_table[src] = mac
 
-                    else:
+                    elif mac not in _attackers:
                         _detected += 1
 
                         logger.debug(f"ARP Spoofing detected from {mac}")
 
                         attacks.append(Attack("arp_spoofing", mac))
+                        _attackers.add(mac)
 
         logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
 
