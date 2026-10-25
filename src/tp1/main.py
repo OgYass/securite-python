@@ -1,8 +1,10 @@
-from tp1.utils.capture import Capture
+from tp1.utils.capture import Capture, Summary
 from tp1.utils.config import logger
-# from tp1.utils.args import Args
+from tp1.utils.args import Args
 
-# import json
+import json
+
+from tp1.utils.report import Report
 
 
 def main():
@@ -12,18 +14,25 @@ def main():
     capture.capture_traffic()
     capture.analyse("tcp")
 
-    # summary = capture.get_summary()
+    _summary: Summary | None = capture.get_summary()
 
-    # with open(Args.report_path or 'report.json', 'w') as f:
-    #     json.dump(summary.to_dict(), f)
+    if _summary is None:
+        logger.error("Cannot get summary")
+        exit()
 
-    # logger.debug("summary : {}".format(summary))
+    summary: Summary = _summary
 
-    # filename = "report.pdf"
-    # report = Report(capture, filename, summary)
+    with open(Args.report_path or "report.json", "w") as f:
+        json.dump(summary.to_dict(), f)
+
+    logger.debug("summary : {}".format(summary))
+
+    filename = "report.pdf"
+    report = Report(capture, filename, summary)
+    # TODO FIX graph
     # report.generate("graph")
-    # report.generate("array")
-    # report.save(filename)
+    report.generate("array")
+    report.save(filename)
 
 
 if __name__ == "__main__":

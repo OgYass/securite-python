@@ -11,3 +11,9 @@ app.log
 .env
 .vscode/
 out/
+poetry.lock
+
+sample.pcap
+
+test.txt
+report.json

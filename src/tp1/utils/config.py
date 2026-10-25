@@ -1,5 +1,5 @@
 from src.config import logging
-from src.tp1.utils.args import Args
+from tp1.utils.args import Args
 
 logger = logging.getLogger("TP1")
 
