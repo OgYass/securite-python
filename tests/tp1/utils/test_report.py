@@ -1,5 +1,6 @@
 from unittest.mock import patch, mock_open, MagicMock
 from src.tp1.utils.report import Report
+from matplotlib import pylab
 
 
 def test_report_init():
@@ -31,6 +32,7 @@ def test_concat_report():
     result = report.concat_report()
 
     # Then
+
     assert result == "Test TitleTest summaryTest ArrayTest Graph"
 
 
@@ -58,7 +60,9 @@ def test_generate_graph():
     report.generate("graph")
 
     # Then
-    assert report.graph == ""  # Currently returns empty string
+    x = [str]
+    y = [int]
+    assert report.graph == pylab.bar(x,y)  # Currently returns empty string
 
 
 def test_generate_array():
@@ -69,7 +73,7 @@ def test_generate_array():
     report.generate("array")
 
     # Then
-    assert report.array == ""  # Currently returns empty string
+    assert report.array == []  # Currently returns empty string
 
 
 def test_generate_invalid_param():

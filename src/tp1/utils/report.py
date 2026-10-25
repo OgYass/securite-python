@@ -1,27 +1,38 @@
-from tp1.utils.capture import Capture
+# from reportlab.platypus import Table
+from tp1.utils.capture import Capture, Summary
+
+# from tp1.utils.logger import logger
+import matplotlib.pyplot as pylab
+from reportlab.pdfgen import canvas
+import json
 
 
 class Report:
-    def __init__(self, capture: Capture, filename: str, summary: str):
+    def __init__(self, capture: Capture, filename: str, summary: Summary):
         self.capture = capture
         self.filename = filename
         self.title = "TITRE DU RAPPORT"
         self.summary = summary
-        self.array = ""
-        self.graph = ""
+        self.array = []
+        self.graph = pylab
+        self.json = {}
 
     def concat_report(self) -> str:
         """
         Concatenate report content
         :return:
         """
+        pdf = canvas.Canvas(self.filename)
+        pdf.setTitle(self.title)
         content = ""
-        content += self.title
-        content += self.summary
-        content += self.array
-        content += self.graph
+        content += json.dumps(self.summary.to_dict())
+        # t = Table(self.array)
 
-        return content
+        pdf.drawString(100, 400, content)
+        # content += self.title
+        # content += self.summary
+        pdf.save()
+        return str(pdf)
 
     def save(self, filename: str) -> None:
         """
@@ -38,10 +49,35 @@ class Report:
         Generate graph and array
         """
         if param == "graph":
-            # TODO: generate graph
-            graph = ""
+            x, y = [], []
+            """
+            Parse le summary pour récuperer les données
+            """
+            for i in json.dumps(self.summary.to_dict()["protocols"]):
+                print(i)
+                x.append(i[0])
+                y.append(int(i[1]))
+            pylab.xlabel("protocols")
+            pylab.ylabel("count")
+            graph = pylab.bar(x, y)
+            # logger("graph output",graph)
+            pylab.savefig("tmp/graph.png")
             self.graph = graph
         elif param == "array":
-            # TODO: generate array
-            array = ""
+            array = [["protocol", "count"]]
+            """
+            Parse le summary pour récuperer les données
+            """
+            for i in self.summary.to_dict()["protocols"]:
+                array.append([i[0], i[1]])
+            # logger("array output",array)
             self.array = array
+
+    def generate_json(self) -> None:
+        dictionary = self.summary.to_dict()
+        json_output = {
+            "protocols": dictionary["protocols"],
+            "attacks": dictionary["attacks"],
+            "flag": dictionary["flag"],
+        }
+        self.json = json.dumps(json_output)
