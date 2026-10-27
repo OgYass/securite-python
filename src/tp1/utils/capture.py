@@ -7,9 +7,9 @@ from scapy.layers.l2 import ARP
 from scapy.layers.inet import IP, TCP
 
 
-from src.tp1.utils.args import Args
-from src.tp1.utils.config import logger
-from src.tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
+from tp1.utils.args import Args
+from tp1.utils.config import logger
+from tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
 
 import inspect
 
@@ -57,7 +57,7 @@ class Summary:
 
 
 class Capture:
-    _LAYER_ALIASES = {"Ether": "ETHERNET"}
+    _LAYER_ALIASES = {"Ether": "Ethernet"}
 
     def __init__(self, timeout: int = 5, pcap_file: str | None = None, interface: str | None = None) -> None:
         self.interface: str = interface or choose_interface()
@@ -92,13 +92,13 @@ class Capture:
         self._is_analyse_done: bool = False
 
     def _handle_packet(self, pkt: Packet) -> None:
-        # logger.debug(f"{pkt.summary()}")
         names = {Capture._LAYER_ALIASES.get(p.__name__, p.__name__) for p in pkt.layers()}
+
+        if pkt.haslayer(TCP) and 80 in (pkt[TCP].sport, pkt[TCP].dport) and len(pkt[TCP].payload) > 0:
+            names.add("HTTP")
 
         for name in names:
             self._protocols[name] = self._protocols.get(name, 0) + 1
-
-            # TODO Capture HTTP and ETHERNET
 
     def capture_traffic(self) -> None:
         """
@@ -144,7 +144,7 @@ class Capture:
         return self._protocols.copy()
 
     def _find_arp_spoofing(self) -> list[Attack]:
-        """Search for ARP spoofing by building an arp table
+        """Search for ARP spoofing by counting ARP replies sent by each MAC for the same IP
 
         Returns:
             list[Attack]: List of all attacks if found
@@ -154,30 +154,30 @@ class Capture:
         if self.captured_packets is None:
             return attacks
 
-        _detected = 0
         _arp_count = 0
 
-        arp_table: dict[str, str] = {}
+        arp_replies: dict[str, dict[str, int]] = {}
 
-        for pck in self.captured_packets:  # TODO Correct function to give best result
+        for pck in self.captured_packets:
             if pck.haslayer(ARP):
                 _arp_count += 1
                 _arp_l = pck.getlayer(ARP)
-                if isinstance(_arp_l, ARP):
+                if isinstance(_arp_l, ARP) and _arp_l.op == 2:
                     arp_l: ARP = _arp_l
                     mac, src = arp_l.hwsrc, arp_l.psrc
 
-                    if arp_table.get(src, mac) == mac:
-                        arp_table[src] = mac
+                    macs = arp_replies.setdefault(src, {})
+                    macs[mac] = macs.get(mac, 0) + 1
 
-                    else:
-                        _detected += 1
+        for src, macs in arp_replies.items():
+            if len(macs) > 1:
+                mac = max(macs, key=lambda m: macs[m])
 
-                        logger.debug(f"ARP Spoofing detected from {mac}")
+                logger.debug(f"ARP Spoofing detected from {mac} on {src} ({macs})")
 
-                        attacks.append(Attack("arp_spoofing", mac))
+                attacks.append(Attack("arp_spoofing", mac))
 
-        logger.debug(f"{_detected} out of {_arp_count} ARP Spoofing detected !")
+        logger.debug(f"{len(attacks)} out of {_arp_count} ARP Spoofing detected !")
 
         return attacks
 

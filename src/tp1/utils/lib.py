@@ -4,7 +4,7 @@ from re import Pattern
 from collections.abc import Iterable
 from scapy.config import conf
 
-from src.tp1.utils.args import Args
+from tp1.utils.args import Args
 
 _FLAG_PATTERN = re.compile(r"ESGI\{tp1_[^}\s]+\}")
 
@@ -61,3 +61,7 @@ def _find_pattern(
                 result.append(found)
 
     return result
+
+
+def hello_world():
+    return "hello world"

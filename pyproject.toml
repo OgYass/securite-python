@@ -2,7 +2,7 @@
 name = "template-code"
 version = "0.1.0"
 description = ""
-authors = ["Thibaud ROBIN <trobin@esgi.com>"]
+authors = ["Thibaud ROBIN <trobin@esgi.com>","grp-78bd9692-f2d6-4830-a889-6ec70582acbe-be0234"]
 readme = "README.md"
 packages = [
   { include = "src" },
@@ -17,18 +17,12 @@ requests = "^2.32.3"
 scapy = "^2.6.0"
 pygal = "^3.0.5"
 fpdf2 = "^2.8.1"
+pytest = "==9.1.1"
+capstone = "^5.0.6"
 python-dotenv = "^1.2.1"
-# Module 2 - triage de malware
-lief = "^0.17"
-yara-python = "^4.5.1"
-python-magic = "^0.4.27"
-# Module 3 - chaîne d'attaque (web + réseau)
-pytesseract = "^0.3.13"
-pillow = "^12.0"
-pwntools = "^4.13.1"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.5"
+matplotlib = "^3.11.2"
+reportlab = "^5.0.1"
+python-magic-standalone = "^0.4.28"
 
 [build-system]
 requires = ["poetry-core"]
@@ -38,3 +32,7 @@ build-backend = "poetry.core.masonry.api"
 tp1 = "tp1.main:main"
 tp2 = "tp2.main:main"
 tp3 = "tp3.main:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
