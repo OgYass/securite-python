@@ -1,5 +1,6 @@
 import argparse
-
+import os
+from tp2.utils.config import logger
 from tp2.utils.report import Report
 from tp2.utils.triage import Triage
 
@@ -12,11 +13,13 @@ def main() -> None:
 
     triage = Triage(args.file, args.llm)
     result = triage.run()
+    """
+
 
     report = Report(result)
     report.generate_pdf(f"{args.file}.triage.pdf")
     report.generate_json(f"{args.file}.triage.json")
-
+    """
 
 if __name__ == "__main__":
     logger.info(f"Key openai value : {os.getenv('OPENAI_KEY')}")

@@ -1,5 +1,8 @@
+import hashlib
 import math
 from collections import Counter
+
+import magic
 
 
 class Sample:
@@ -9,7 +12,14 @@ class Sample:
 
     def get_file_metadata(self) -> dict:
         """sha256, md5, taille, type de fichier, entropie de Shannon."""
-        raise NotImplementedError
+        sha256 = hashlib.sha256(self.data).hexdigest()
+        md5 = hashlib.md5(self.data).hexdigest()
+        ftype = magic.from_buffer(self.data)
+        size = len(self.data)
+        entropy = self.shannon_entropy()
+
+        return {"sha256": sha256, "md5": md5, "ftype": ftype, "size": size, "entropy": entropy}
+
 
     def shannon_entropy(self) -> float:
         if not self.data:
