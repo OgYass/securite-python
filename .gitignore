@@ -9,8 +9,5 @@ __pycache__/
 report.pdf
 app.log
 .env
-poetry.lock
-
-sample.pcap
-
-test.txt
+.vscode/
+out/
