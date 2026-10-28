@@ -13,6 +13,7 @@ def main() -> None:
 
     triage = Triage(args.file, args.llm)
     result = triage.run()
+    logger.info(result)
     """
 
 

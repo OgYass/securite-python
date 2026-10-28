@@ -9,9 +9,13 @@ def extract_iocs(data:bytes) -> dict:
 
     domain = re.compile(r"\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b", re.I)
     domains_list = set(domain.findall(text))
+    if len(domains_list) == 0:
+        domains_list = {}
 
     url = re.compile(r"https?://[^\s\"']+")
     urls_list = set(url.findall(text))
+    if len(urls_list) == 0:
+        urls_list = {}
 
     mutex = re.compile(
         r"\b(?:Global\\|Local\\)?"
@@ -21,6 +25,8 @@ def extract_iocs(data:bytes) -> dict:
         re.IGNORECASE,
     )
     mutex_list = set(mutex.findall(text))
+    if len(mutex_list) == 0:
+        mutex_list = {}
 
     registry = re.compile(
         r"\b(?:HKCU|HKLM|HKCR|HKU|HKCC)"
@@ -28,6 +34,8 @@ def extract_iocs(data:bytes) -> dict:
         re.IGNORECASE,
     )
     registry_list = set(registry.findall(text))
+    if len(registry_list) == 0:
+        registry_list = {}
 
     path_windows = re.compile(
         r"""(?<![A-Za-z0-9_])(?:[A-Za-z]:\\|\\\\)[^\s"'<>|:*?]+(?:\\[^\s"'<>|:*?]+)*"""
@@ -38,8 +46,12 @@ def extract_iocs(data:bytes) -> dict:
     )
     paths_list = (set(path_windows.findall(text)))
     paths_list.update(path_linux.findall(text))
+    if len(paths_list) == 0:
+        paths_list = {}
 
     ipv4_list = set(extract_ipv4(data))
+    if len(ipv4_list) == 0:
+        ipv4_list = {}
 
     return {
         "domains": domains_list,

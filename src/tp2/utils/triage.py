@@ -17,8 +17,10 @@ class Triage:
 
         meta = sample.get_file_metadata()
         logger.info(meta)
-        # iocs = sample.extract_iocs()
-        # bininfo = sample.parse_binary()
+        iocs = sample.extract_iocs()
+        logger.info(iocs)
+        bininfo = sample.parse_binary()
+        logger.info(bininfo)
         # matches = self.scanner.scan(sample.data)
         # summary = json.dumps({"meta": meta, "iocs": iocs, "yara": matches, "bin": bininfo})
         # verdict = self.llm.triage(summary)
