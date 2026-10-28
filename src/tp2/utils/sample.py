@@ -4,6 +4,9 @@ from collections import Counter
 
 import magic
 
+from tp2.utils.parse_binary import parse_binary
+from tp2.utils.extract_iocs import extract_iocs
+
 
 class Sample:
     def __init__(self, path: str) -> None:
@@ -30,8 +33,10 @@ class Sample:
 
     def extract_iocs(self) -> dict:
         """domaines, ips, urls, mutex, registry (regex sur les strings)."""
-        raise NotImplementedError
+        return  extract_iocs(self.data)
+
 
     def parse_binary(self) -> dict:
         """imports / sections via lief (si PE/ELF)."""
-        raise NotImplementedError
+        return parse_binary(self.data)
+
