@@ -10,6 +10,7 @@ from tp3.utils.config import logger
 from tp3.utils.args import Args
 from tp3.utils.fuzzer import Fuzzer
 from tp3.utils.session import Session
+from tp3.utils.decoder import Decoder
 
 
 def breach_web(target: str) -> tuple[str, int, bytes]:
@@ -33,16 +34,20 @@ def breach_network(host: str, port: int, key: bytes) -> str:
 
     Retourne le flag final. Indices : pwn.remote, base64.
     """
-    raise NotImplementedError
+    decoder = Decoder(host, port, key)
+    if not decoder.run():
+        logger.error("Flag final non obtenu")
+        raise SystemExit(1)
+
+    return decoder.get_flag()
 
 
 def main() -> None:
-    
     logger.info(f"Starting TP3 against {Args.target}")
 
     host, port, key = breach_web(Args.target)
     flag = breach_network(host, port, key)
-    logger.info(f"FLAG_FINAL: {flag}")
+    logger.info(f"[+] FLAG_FINAL: {flag}")
 
 
 if __name__ == "__main__":
