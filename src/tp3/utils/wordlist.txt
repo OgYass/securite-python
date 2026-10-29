@@ -1,0 +1,15 @@
+admin
+login
+captcha
+challenge
+secret
+hidden
+flag
+api
+robots.txt
+.git
+debug
+test
+verify
+gate
+portal

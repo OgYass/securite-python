@@ -23,6 +23,9 @@ python-dotenv = "^1.2.1"
 matplotlib = "^3.11.2"
 reportlab = "^5.0.1"
 python-magic-standalone = "^0.4.28"
+pillow = "^13.0.0"
+pytesseract = "^0.3.13"
+pwntools = "^4.15.0"
 
 [build-system]
 requires = ["poetry-core"]
