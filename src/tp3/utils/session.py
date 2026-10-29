@@ -1,13 +1,9 @@
-import re
+from urllib.parse import urljoin
 
 import requests
 
 from tp3.utils.captcha import Captcha
 from tp3.utils.config import logger
-
-FLAG_RE = re.compile(r"ESGI\{[^}]+\}")
-HOSTPORT_RE = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}|[\w.-]+):(\d{2,5})")
-KEY_RE = re.compile(r"key\s*[:=]\s*([0-9a-fA-F]+)")
 
 
 class Session:
@@ -20,6 +16,10 @@ class Session:
     def __init__(self, url: str, session: requests.Session | None = None) -> None:
         self.url: str = url
         """Url of the hidden page serving the captcha and the form
+        """
+
+        self.captcha_url: str = urljoin(url, "/captcha.png")
+        """Direct url of the captcha image served by the page
         """
 
         self.session: requests.Session = session or requests.Session()
@@ -48,7 +48,12 @@ class Session:
         """
         Prepares the request for sending by capturing and solving the captcha.
         """
-        captcha = Captcha(self.url, session=self.session)
+        try:
+            self.session.get(self.url, timeout=5)
+        except requests.RequestException as exc:
+            logger.debug(f"panel get error {exc}")
+
+        captcha = Captcha(self.captcha_url, session=self.session)
         captcha.capture()
         captcha.solve()
 
@@ -73,20 +78,20 @@ class Session:
         if self._response is None:
             return False
 
-        body = self._response.text
-
-        flags = FLAG_RE.findall(body)
-        hostport = HOSTPORT_RE.search(body)
-        key = KEY_RE.search(body)
-
-        if not (flags and hostport and key):
+        try:
+            data = self._response.json()
+        except ValueError:
             logger.debug("captcha rejected or page incomplete")
             return False
 
-        self.valid_flag = flags[0]
-        self.host = hostport.group(1)
-        self.port = int(hostport.group(2))
-        self.key = bytes.fromhex(key.group(1))
+        if not all(k in data for k in ("flag1", "host", "port", "key")):
+            logger.debug("captcha rejected or page incomplete")
+            return False
+
+        self.valid_flag = data["flag1"]
+        self.host = data["host"]
+        self.port = int(data["port"])
+        self.key = bytes.fromhex(data["key"])
 
         logger.info(f"[+] FLAG1: {self.valid_flag}")
         logger.info(f"service revealed : {self.host}:{self.port}")
