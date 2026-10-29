@@ -1,7 +1,6 @@
-import os
 import requests
 from tp2.utils.config import logger
-
+from tp2.utils.llmclient import OpenRouterClient, OllamaClient, LLMClient
 
 SYSTEM_PROMPT = (
     "Tu es un analyste malware. On te fournit des FEATURES extraites d'un "
@@ -11,49 +10,15 @@ SYSTEM_PROMPT = (
 )
 
 
-def llm_openrouter(summary: str, system: str) -> str:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        raise RuntimeError("Pas de API_KEY OPENROUTER")
-
-    r = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json={
-            "model": "meta-llama/llama-3.3-70b-instruct:free",
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": summary},
-            ],
-        },
-        timeout=60,
-    )
-
-    if not r.ok:
-        raise RuntimeError(f"Openrouter HTTP {r.status_code}: {r.text}")
-
-    return r.json()["choices"][0]["message"]["content"]
-
-
-def llm_ollama(summary: str, system: str) -> str:
-    r = requests.post(
-        "http://localhost:11434/api/chat",
-        json={
-            "model": "qwen2.5:3b",
-            "stream": False,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": summary},
-            ],
-        },
-        timeout=120,
-    )
-    return r.json()["message"]["content"]
+def verdict_when_error(summary):
+    return str({"family_guess": None, "mitre_attack": None, "llm_summary": None, "score": None, "flag": None})
 
 
 class LLMTriage:
     def __init__(self, backend: str = "openrouter") -> None:
-        self.backend = backend
+        clients = {"openrouter": OpenRouterClient, "ollama": OllamaClient}
+        client_type = clients[backend]
+        self.client: LLMClient = client_type()
 
     def triage(self, summary: str) -> str:
         """Envoie un RÉSUMÉ structuré (pas le binaire) et renvoie le verdict JSON.
@@ -61,12 +26,8 @@ class LLMTriage:
         Défense anti-injection : ne jamais laisser le LLM décider seul, valider
         la sortie, recouper avec YARA et les IOC.
         """
-        if self.backend == "openrouter":
-            logger.info("calling openrouter backend")
-            return llm_openrouter(summary, SYSTEM_PROMPT)
-
-        if self.backend == "ollama":
-            logger.info("calling ollama backend")
-            return llm_ollama(summary, SYSTEM_PROMPT)
-
-        raise ValueError(f"Unsupported LLM backend: {self.backend}")
+        try:
+            return self.client.generate(summary, SYSTEM_PROMPT)
+        except (requests.RequestException, ValueError, KeyError, TypeError) as error:
+            logger.warning(f"LLM indsiponible : {error}")
+            return verdict_when_error(summary)

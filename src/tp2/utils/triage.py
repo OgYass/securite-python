@@ -14,7 +14,7 @@ class Triage:
 
     def run(self) -> dict:
         """
-        Acquisition des samples
+        Acquisition des samples, extraction des iocs, parsing des binaires -> construction du summary
         """
         sample = Sample(self.path)
         logger.info(f"Triage de {self.path} ({len(sample.data)} octets)")
@@ -40,7 +40,7 @@ class Triage:
             "entropy": meta["entropy"],
             "file_type": meta["file_type"],
             "iocs": iocs,
-            "imports": bininfo["imports"],
+            "imports": bininfo.get("imports") or [],
             "yara_matches": matches,
             "family_guess": verdict.get("family_guess", "unknown"),
             "mitre_attack": verdict.get("mitre_attack", []),

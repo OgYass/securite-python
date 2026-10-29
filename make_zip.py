@@ -1,15 +1,11 @@
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
+from tp2.utils.config import logger
 
 root = Path(__file__).resolve().parent
 destination = root.parent / "projet.zip"
 
-excluded_dirs = {
-    ".venv",
-    "__pycache__",
-    ".idea",
-    ".vscode",
-}
+excluded_dirs = {".venv", "__pycache__", ".idea", ".vscode", "output", "testsamples"}
 
 with ZipFile(destination, "w", ZIP_DEFLATED) as archive:
     for path in root.rglob("*"):
@@ -26,4 +22,4 @@ with ZipFile(destination, "w", ZIP_DEFLATED) as archive:
 
         archive.write(path, relative)
 
-print(f"Archive créée : {destination}")
+logger.info(f"Archive créée : {destination}")
