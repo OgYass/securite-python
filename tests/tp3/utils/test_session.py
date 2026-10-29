@@ -1,51 +1,51 @@
-from src.tp3.utils.session import Session
+from unittest.mock import MagicMock, patch
+
+from tp3.utils.session import Session
 
 
 def test_session_init():
-    # Given
-    url = "http://example.com/captcha"
-
-    # When
-    session = Session(url)
-
-    # Then
-    assert session.url == url
-    assert session.captcha_value == ""
-    assert session.flag_value == ""
-    assert session.valid_flag == ""
+    s = Session("http://x/secret")
+    assert s.url == "http://x/secret"
+    assert s.captcha_value == ""
+    assert s.valid_flag == ""
+    assert s.host == ""
+    assert s.port == 0
+    assert s.key == b""
 
 
-def test_submit_request():
-    # Given
-    session = Session("http://example.com/captcha")
-
-    # When
-    session.submit_request()
-
-    # Then
-    # This is a minimal test since the method doesn't do anything yet
-    assert True
+def test_process_response_parses_page():
+    s = Session("http://x/secret")
+    s._response = MagicMock(text="flag ESGI{web_ok} service 10.0.0.1:9090 key: deadbeef")
+    assert s.process_response() is True
+    assert s.valid_flag == "ESGI{web_ok}"
+    assert s.host == "10.0.0.1"
+    assert s.port == 9090
+    assert s.key == b"\xde\xad\xbe\xef"
 
 
-def test_process_response():
-    # Given
-    session = Session("http://example.com/captcha")
+def test_process_response_rejects_incomplete():
+    s = Session("http://x/secret")
+    s._response = MagicMock(text="wrong captcha")
+    assert s.process_response() is False
 
-    # When
-    result = session.process_response()
 
-    # Then
-    # This is a minimal test since the method doesn't do anything yet
-    assert result is None
+@patch("tp3.utils.session.Captcha")
+def test_prepare_request_sets_value(mock_captcha):
+    mock_captcha.return_value.get_value.return_value = "AB12"
+    s = Session("http://x/secret")
+    s.prepare_request()
+    assert s.captcha_value == "AB12"
+
+
+@patch("requests.Session.post")
+def test_submit_request_stores_response(mock_post):
+    mock_post.return_value = MagicMock(text="ok")
+    s = Session("http://x/secret")
+    s.submit_request()
+    assert s._response is not None
 
 
 def test_get_flag():
-    # Given
-    session = Session("http://example.com/captcha")
-    session.valid_flag = "FLAG123"
-
-    # When
-    result = session.get_flag()
-
-    # Then
-    assert result == "FLAG123"
+    s = Session("http://x/secret")
+    s.valid_flag = "ESGI{web_ok}"
+    assert s.get_flag() == "ESGI{web_ok}"
