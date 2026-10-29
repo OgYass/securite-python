@@ -1,3 +1,5 @@
+import json
+
 from tp2.utils.config import logger
 from tp2.utils.llm import LLMTriage
 from tp2.utils.sample import Sample
@@ -19,10 +21,10 @@ class Triage:
         logger.info(meta)
         iocs = sample.extract_iocs()
         logger.info(iocs)
-        bininfo = sample.parse_binary()
-        logger.info(bininfo)
-        # matches = self.scanner.scan(sample.data)
-        # summary = json.dumps({"meta": meta, "iocs": iocs, "yara": matches, "bin": bininfo})
-        # verdict = self.llm.triage(summary)
+        #bininfo = sample.parse_binary()
+        #logger.info(bininfo)
+        #matches = self.scanner.scan(sample.data)
+        #summary = json.dumps({"meta": meta, "iocs": iocs, "yara": matches, "bin": bininfo})
+        #verdict = self.llm.triage(summary)
 
         return {}

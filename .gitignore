@@ -15,5 +15,6 @@ poetry.lock
 
 sample.pcap
 
-test.txt
+lief_test.exe
+test.exe
 report.json
