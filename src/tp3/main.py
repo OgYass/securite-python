@@ -6,9 +6,8 @@ chronométré). Voir tp3-breach-the-target.md.
     poetry run tp3 --target http://127.0.0.1:8080
 """
 
-import argparse
-
 from tp3.utils.config import logger
+from tp3.utils.args import Args
 
 
 def breach_web(target: str) -> tuple[str, int, bytes]:
@@ -28,12 +27,10 @@ def breach_network(host: str, port: int, key: bytes) -> str:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--target", default="http://127.0.0.1:8080")
-    args = ap.parse_args()
+    
+    logger.info(f"Starting TP3 against {Args.target}")
 
-    logger.info("Starting TP3 - breach the target")
-    host, port, key = breach_web(args.target)
+    host, port, key = breach_web(Args.target)
     flag = breach_network(host, port, key)
     logger.info(f"FLAG_FINAL: {flag}")
 
