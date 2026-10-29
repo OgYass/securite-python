@@ -1,10 +1,36 @@
 import io
+import os
+import shutil
 
 import pytesseract
 import requests
 from PIL import Image
 
 from tp3.utils.config import logger
+
+_TESSERACT_PATHS = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+)
+
+
+def configure_tesseract() -> str | None:
+    """
+    Pointe pytesseract vers le binaire tesseract s'il est absent du PATH.
+    """
+    if shutil.which("tesseract"):
+        return pytesseract.pytesseract.tesseract_cmd
+
+    for path in _TESSERACT_PATHS:
+        if os.path.exists(path):
+            pytesseract.pytesseract.tesseract_cmd = path
+            logger.debug(f"tesseract found at {path}")
+            return path
+
+    return None
+
+
+configure_tesseract()
 
 
 class Captcha:

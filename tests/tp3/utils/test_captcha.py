@@ -1,9 +1,10 @@
 import io
 from unittest.mock import MagicMock, patch
 
+import pytesseract
 from PIL import Image
 
-from tp3.utils.captcha import Captcha
+from tp3.utils.captcha import Captcha, configure_tesseract
 
 
 def _png_bytes() -> bytes:
@@ -50,3 +51,31 @@ def test_get_value():
     captcha = Captcha("http://example.com/captcha.png")
     captcha.value = "TEST12"
     assert captcha.get_value() == "TEST12"
+
+
+@patch("tp3.utils.captcha.shutil.which", return_value="/usr/bin/tesseract")
+def test_configure_tesseract_keeps_path_env(_mock_which):
+    # tesseract dans le PATH : on ne force rien.
+    before = pytesseract.pytesseract.tesseract_cmd
+    assert configure_tesseract() == before
+
+
+@patch("tp3.utils.captcha.os.path.exists", return_value=True)
+@patch("tp3.utils.captcha.shutil.which", return_value=None)
+def test_configure_tesseract_sets_known_path(_mock_which, _mock_exists):
+    saved = pytesseract.pytesseract.tesseract_cmd
+    try:
+        result = configure_tesseract()
+        assert result in (
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+        )
+        assert pytesseract.pytesseract.tesseract_cmd == result
+    finally:
+        pytesseract.pytesseract.tesseract_cmd = saved
+
+
+@patch("tp3.utils.captcha.os.path.exists", return_value=False)
+@patch("tp3.utils.captcha.shutil.which", return_value=None)
+def test_configure_tesseract_returns_none_when_absent(_mock_which, _mock_exists):
+    assert configure_tesseract() is None
