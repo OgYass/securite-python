@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.whl
 *.db
 *.sqlite3
 report.pdf
