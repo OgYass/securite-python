@@ -13,3 +13,15 @@ test
 verify
 gate
 portal
+panel
+internal
+internal-panel
+intranet
+dashboard
+console
+staff
+backoffice
+back-office
+private
+restricted
+zone
