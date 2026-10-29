@@ -8,14 +8,24 @@ chronométré). Voir tp3-breach-the-target.md.
 
 from tp3.utils.config import logger
 from tp3.utils.args import Args
+from tp3.utils.fuzzer import Fuzzer
+from tp3.utils.session import Session
 
 
 def breach_web(target: str) -> tuple[str, int, bytes]:
-    """Fuzz les endpoints, casse le CAPTCHA, retourne (host, port, key).
+    fuzzer = Fuzzer(target)
+    fuzzer.fuzz()
+    endpoint = fuzzer.best_endpoint()
+    if endpoint is None:
+        logger.error("Aucun endpoint trouvé")
+        raise SystemExit(1)
 
-    Affiche aussi Flag 1. Indices : requests, PIL, pytesseract.
-    """
-    raise NotImplementedError
+    session = Session(f"{target}/{endpoint}", session=fuzzer.session)
+    if not session.solve():
+        logger.error("Captcha non résolu")
+        raise SystemExit(1)
+
+    return session.host, session.port, session.key
 
 
 def breach_network(host: str, port: int, key: bytes) -> str:
