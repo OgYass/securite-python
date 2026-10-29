@@ -1,49 +1,52 @@
-from src.tp3.utils.captcha import Captcha
+import io
+from unittest.mock import MagicMock, patch
+
+from PIL import Image
+
+from tp3.utils.captcha import Captcha
+
+
+def _png_bytes() -> bytes:
+    """Petit PNG blanc valide pour que Image.open ne plante pas."""
+    buf = io.BytesIO()
+    Image.new("RGB", (60, 24), "white").save(buf, "PNG")
+    return buf.getvalue()
 
 
 def test_captcha_init():
-    # Given
-    url = "http://example.com/captcha"
-
-    # When
-    captcha = Captcha(url)
-
-    # Then
-    assert captcha.url == url
-    assert captcha.image == ""
+    captcha = Captcha("http://example.com/captcha.png")
+    assert captcha.url == "http://example.com/captcha.png"
+    assert captcha.image == b""
     assert captcha.value == ""
 
 
-def test_solve():
-    # Given
-    captcha = Captcha("http://example.com/captcha")
+def test_capture_stores_content():
+    captcha = Captcha("http://example.com/captcha.png")
+    captcha.session = MagicMock()
+    captcha.session.get.return_value = MagicMock(content=b"PNGDATA")
 
-    # When
-    captcha.solve()
-
-    # Then
-    assert captcha.value == "FIXME"
-
-
-def test_capture():
-    # Given
-    captcha = Captcha("http://example.com/captcha")
-
-    # When
     captcha.capture()
 
-    # Then
-    # This is a minimal test since the method doesn't do anything yet
-    assert captcha.image == ""
+    assert captcha.image == b"PNGDATA"
+
+
+@patch("tp3.utils.captcha.pytesseract.image_to_string", return_value="AB 12C\n")
+def test_solve_keeps_only_alnum(_mock_ocr):
+    captcha = Captcha("http://example.com/captcha.png")
+    captcha.image = _png_bytes()
+
+    captcha.solve()
+
+    assert captcha.value == "AB12C"
+
+
+def test_solve_without_image_keeps_empty():
+    captcha = Captcha("http://example.com/captcha.png")
+    captcha.solve()
+    assert captcha.value == ""
 
 
 def test_get_value():
-    # Given
-    captcha = Captcha("http://example.com/captcha")
-    captcha.value = "TEST123"
-
-    # When
-    result = captcha.get_value()
-
-    # Then
-    assert result == "TEST123"
+    captcha = Captcha("http://example.com/captcha.png")
+    captcha.value = "TEST12"
+    assert captcha.get_value() == "TEST12"
