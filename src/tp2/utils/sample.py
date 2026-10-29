@@ -20,9 +20,7 @@ class Sample:
         ftype = magic.from_buffer(self.data)
         size = len(self.data)
         entropy = self.shannon_entropy()
-
-        return {"sha256": sha256, "md5": md5, "ftype": ftype, "size": size, "entropy": entropy}
-
+        return {"sha256": sha256, "md5": md5, "size": size, "entropy": entropy, "file_type": ftype}
 
     def shannon_entropy(self) -> float:
         if not self.data:
@@ -33,10 +31,8 @@ class Sample:
 
     def extract_iocs(self) -> dict:
         """domaines, ips, urls, mutex, registry (regex sur les strings)."""
-        return  extract_iocs(self.data)
-
+        return extract_iocs(self.data)
 
     def parse_binary(self) -> dict:
         """imports / sections via lief (si PE/ELF)."""
         return parse_binary(self.data)
-

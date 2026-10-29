@@ -4,4 +4,6 @@ class YaraScanner:
 
     def scan(self, data: bytes) -> list[str]:
         """Noms des règles YARA déclenchées."""
+        yara_matches = []
+        return yara_matches
         raise NotImplementedError

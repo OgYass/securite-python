@@ -1,5 +1,6 @@
 import argparse
-import os
+from pathlib import Path
+
 from tp2.utils.config import logger
 from tp2.utils.report import Report
 from tp2.utils.triage import Triage
@@ -7,21 +8,36 @@ from tp2.utils.triage import Triage
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("-f", "--file", required=True)
+    ap.add_argument("--samples", type=Path, required=True)
+    ap.add_argument("--rules", type=Path, required=True)
+    ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--llm", choices=["openrouter", "ollama"], default="openrouter")
     args = ap.parse_args()
 
-    triage = Triage(args.file, args.llm)
-    result = triage.run()
-    #logger.info(result)
-    """
+    args.out.mkdir(parents=True, exist_ok=True)
 
+    samples = sorted(path for path in args.samples.iterdir() if path.is_file())
+    if len(samples) == 0:
+        logger.warning("no samples found")
+        return
 
-    report = Report(result)
-    report.generate_pdf(f"{args.file}.triage.pdf")
-    report.generate_json(f"{args.file}.triage.json")
-    """
+    for sample in samples:
+        try:
+            logger.info(f"Triage of sample {sample}")
+            triage = Triage(sample, str(args.rules), args.llm)
+            result = triage.run()
+            # logger.info(result)
+
+            logger.info("Success! Writing report...")
+            report = Report(result)
+            report.generate_json(args.out / f"{report.result['sha256']}.triage.json")
+            report.generate_pdf(args.out / f"{report.result['sha256']}.pdf")
+
+        except Exception:
+            logger.exception(f"Exception during triage of sample {sample}")
+
+    logger.info("Done")
+
 
 if __name__ == "__main__":
-    logger.info(f"Key openai value : {os.getenv('OPENAI_KEY')}")
     main()

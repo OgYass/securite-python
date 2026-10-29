@@ -1,48 +1,81 @@
-from platform import architecture
-
 import lief
 from lief import Binary
 
-from tp2.utils.config import logger
-
 
 def parse_binary(data: bytes) -> dict:
-    binary = parse_data(data)
-    logger.info(binary)
-
-    format = parse_format(binary)
-    architecture = get_architecture(binary)
-    entrypoint = binary.entrypoint
-
     result = {
-        "format": format,
-        "architecture": architecture,
-        "entrypoint": entrypoint,
+        "format": None,
+        "architecture": None,
+        "entrypoint": None,
         "imports": [],
         "sections": [],
     }
+    try:
+        binary = parse_data(data)
+    except (RuntimeError, ValueError):
+        binary = None
+    if binary is None:
+        return result
+    # logger.info(binary)
+
+    result["format"] = parse_format(binary)
+    result["architecture"] = parse_architecture(binary)
+    result["entrypoint"] = parse_entrypoint(binary)
+    result["imports"] = parse_imports(binary)
+    result["sections"] = parse_sections(binary)
+
     return result
 
-def parse_data(data: bytes)-> Binary | {}:
+
+def parse_data(data: bytes) -> Binary | None:
     try:
         binary = lief.parse(data)
     except (RuntimeError, ValueError):
-        return {}
+        return None
 
     if binary is None:
-        return {}
+        return None
 
     return binary
 
-def parse_format(binary: Binary) -> Binary | {}:
-    try:
-        format = binary.format.name
-    except (RuntimeError, ValueError):
-        return {}
 
-def get_architecture(binary: Binary) :
+def parse_entrypoint(binary: Binary) -> int | None:
     try:
-
-        return  binary.header
+        entrypoint = binary.entrypoint
+        return entrypoint
     except (RuntimeError, ValueError):
-        return  None
+        return None
+
+
+def parse_format(binary: Binary) -> str | None:
+    try:
+        return binary.format.name
+    except (RuntimeError, ValueError):
+        return None
+
+
+def parse_architecture(binary: Binary) -> str | None:
+    try:
+        return binary.header.machine.name
+    except (RuntimeError, ValueError):
+        return None
+
+
+def parse_imports(binary: Binary) -> list[str] | None:
+    try:
+        imports = []
+        for imp in binary.imports:
+            imports.append(imp.name)
+        return imports
+    except (RuntimeError, ValueError):
+        return None
+
+
+def parse_sections(binary: Binary) -> list[str] | None:
+    try:
+        sections = []
+        for sec in binary.sections:
+            sections.append(sec.name)
+        return sections
+    except (RuntimeError, ValueError):
+        return None

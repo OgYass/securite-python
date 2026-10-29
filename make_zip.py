@@ -1,0 +1,29 @@
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
+
+root = Path(__file__).resolve().parent
+destination = root.parent / "projet.zip"
+
+excluded_dirs = {
+    ".venv",
+    "__pycache__",
+    ".idea",
+    ".vscode",
+}
+
+with ZipFile(destination, "w", ZIP_DEFLATED) as archive:
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+
+        relative = path.relative_to(root)
+
+        if any(part in excluded_dirs for part in relative.parts):
+            continue
+
+        if any(part.endswith("_cache") for part in relative.parts):
+            continue
+
+        archive.write(path, relative)
+
+print(f"Archive créée : {destination}")

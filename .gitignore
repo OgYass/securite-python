@@ -8,6 +8,7 @@ __pycache__/
 *.sqlite3
 report.pdf
 app.log
+.venv
 .env
 .vscode/
 out/
@@ -15,6 +16,9 @@ poetry.lock
 
 sample.pcap
 
-lief_test.exe
-test.exe
+testsamples/lief_test.exe
+testsamples/test.txt
 report.json
+compress.sh
+compress.ps1
+/student
