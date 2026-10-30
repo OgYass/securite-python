@@ -1,9 +1,8 @@
 import json
-
 from pathlib import Path
 
-
 from fpdf import FPDF
+
 from tp2.utils.report import Report
 
 

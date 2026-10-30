@@ -28,6 +28,7 @@ def breach_network(host: str, port: int, key: bytes) -> str:
 
 
 def main() -> None:
+    """Point d'entree du TP3."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", default="http://127.0.0.1:8080")
     args = ap.parse_args()

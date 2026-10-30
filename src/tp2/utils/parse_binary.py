@@ -5,6 +5,7 @@ from tp2.utils.config import logger
 
 
 def parse_binary(data: bytes) -> dict:
+    """Format, architecture, entrypoint, imports et sections via lief."""
     result = {
         "format": None,
         "architecture": None,
@@ -30,6 +31,7 @@ def parse_binary(data: bytes) -> dict:
 
 
 def parse_data(data: bytes) -> Binary | None:
+    """Parsing lief des donnees, None si non executable."""
     try:
         binary = lief.parse(data)
     except (RuntimeError, ValueError):
@@ -42,6 +44,7 @@ def parse_data(data: bytes) -> Binary | None:
 
 
 def parse_entrypoint(binary: Binary) -> int | None:
+    """Adresse du point d'entree."""
     try:
         entrypoint = binary.entrypoint
         return entrypoint
@@ -50,6 +53,7 @@ def parse_entrypoint(binary: Binary) -> int | None:
 
 
 def parse_format(binary: Binary) -> str | None:
+    """Format du binaire (PE, ELF...)."""
     try:
         return binary.format.name
     except (RuntimeError, ValueError):
@@ -57,6 +61,7 @@ def parse_format(binary: Binary) -> str | None:
 
 
 def parse_architecture(binary: Binary, format: str) -> str | None:
+    """Architecture du binaire."""
     try:
         if format == "PE":
             return binary.header.machine.name
@@ -67,6 +72,7 @@ def parse_architecture(binary: Binary, format: str) -> str | None:
 
 
 def parse_imports(binary: Binary, format: str) -> list[str] | None:
+    """Liste des fonctions importees."""
     try:
         if format == "PE":
             imports = []
@@ -93,6 +99,7 @@ def parse_imports(binary: Binary, format: str) -> list[str] | None:
 
 
 def parse_sections(binary: Binary) -> list[str] | None:
+    """Noms des sections."""
     try:
         sections = []
         for sec in binary.sections:

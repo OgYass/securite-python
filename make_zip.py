@@ -1,5 +1,6 @@
 from pathlib import Path
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZIP_DEFLATED, ZipFile
+
 # from tp2.utils.config import logger
 
 root = Path(__file__).resolve().parent

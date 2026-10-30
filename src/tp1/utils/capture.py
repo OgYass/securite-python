@@ -1,20 +1,20 @@
-from typing import Literal
+import inspect
+from typing import ClassVar, Literal
 
 from scapy.all import sniff
+from scapy.layers.inet import IP, TCP
+from scapy.layers.l2 import ARP
 from scapy.packet import Packet
 from scapy.plist import PacketList
-from scapy.layers.l2 import ARP
-from scapy.layers.inet import IP, TCP
-
 
 from tp1.utils.args import Args
 from tp1.utils.config import logger
 from tp1.utils.lib import choose_interface, contains_sql_injection, find_flags
 
-import inspect
-
 
 class Attack:
+    """Attaque detectee dans la capture."""
+
     def __init__(self, type: Literal["arp_spoofing", "port_scan", "sql_injection"], attacker: str):
         """_summary_
 
@@ -26,9 +26,11 @@ class Attack:
         self.attacker = attacker
 
     def to_dict(self) -> dict[str, str]:
+        """Conversion en dictionnaire serialisable en JSON."""
         return {"type": self.type, "attacker": self.attacker}
 
     def __str__(self) -> str:
+        """Representation lisible."""
         return f"({self.type}, {self.attacker})"
 
     __repr__ = __str__
@@ -38,14 +40,18 @@ Protocols = dict[str, int]
 
 
 class Summary:
+    """Resume de l'analyse d'une capture."""
+
     def __init__(
         self, protocols: Protocols | None = None, attacks: list[Attack] | None = None, flag: str = ""
     ) -> None:
+        """Initialisation des attributs."""
         self.protocols = protocols or {}
         self.attacks = attacks or []
         self.flag = flag
 
     def to_dict(self) -> dict[str, Protocols | str | list[dict[str, str]]]:
+        """Conversion en dictionnaire serialisable en JSON."""
         return {
             "protocols": self.protocols,
             "attacks": [a.to_dict() for a in self.attacks],
@@ -53,13 +59,17 @@ class Summary:
         }
 
     def __str__(self) -> str:
+        """Representation lisible."""
         return f"Protocols : {self.protocols}\nattacks : {self.attacks}\nFlag : {self.flag}"
 
 
 class Capture:
-    _LAYER_ALIASES = {"Ether": "Ethernet"}
+    """Capture et analyse du trafic reseau."""
+
+    _LAYER_ALIASES: ClassVar[dict[str, str]] = {"Ether": "Ethernet"}
 
     def __init__(self, timeout: int = 5, pcap_file: str | None = None, interface: str | None = None) -> None:
+        """Initialisation des attributs."""
         self.interface: str = interface or choose_interface()
         """Interface to sniff if no pcap
         """
@@ -92,6 +102,7 @@ class Capture:
         self._is_analyse_done: bool = False
 
     def _handle_packet(self, pkt: Packet) -> None:
+        """Traitement d'un paquet capture."""
         names = {Capture._LAYER_ALIASES.get(p.__name__, p.__name__) for p in pkt.layers()}
 
         if pkt.haslayer(TCP) and 80 in (pkt[TCP].sport, pkt[TCP].dport) and len(pkt[TCP].payload) > 0:
@@ -256,6 +267,7 @@ class Capture:
         return attacks
 
     def _find_flag(self) -> str | None:
+        """Recherche d'un flag dans les paquets."""
         raise NotImplementedError()
 
         # logger.debug("Starting search of SQL injection")

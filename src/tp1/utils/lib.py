@@ -1,7 +1,7 @@
 import re
+from collections.abc import Iterable
 from re import Pattern
 
-from collections.abc import Iterable
 from scapy.config import conf
 
 from tp1.utils.args import Args
@@ -34,16 +34,19 @@ def choose_interface() -> str:
 
 
 def find_flags(data: str | bytes | Iterable[str | bytes]) -> list[str]:
+    """Recherche des flags dans les donnees."""
     return _find_pattern(data, _FLAG_PATTERN)
 
 
 def contains_sql_injection(data: str | bytes | Iterable[str | bytes]) -> bool:
+    """Recherche des motifs d'injection SQL."""
     return len(_find_pattern(data, _SQL_PATTERNS)) > 0
 
 
 def _find_pattern(
     data: str | bytes | Iterable[str | bytes], pattern: Pattern[str] | Iterable[Pattern[str]]
 ) -> list[str]:
+    """Applique une liste de regex sur les donnees."""
     result: list[str] = []
 
     if isinstance(data, (str, bytes)):
@@ -57,11 +60,11 @@ def _find_pattern(
             text = text.decode(errors="ignore")
 
         for p in pattern:
-            for found in p.findall(text):
-                result.append(found)
+            result.extend(p.findall(text))
 
     return result
 
 
 def hello_world():
+    """Renvoie hello world."""
     return "hello world"

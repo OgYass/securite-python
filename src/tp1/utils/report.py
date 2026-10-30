@@ -1,14 +1,18 @@
 # from reportlab.platypus import Table
-from tp1.utils.config import logger
-from tp1.utils.capture import Capture, Summary
+import json
 
 import matplotlib.pyplot as pylab
 from reportlab.pdfgen import canvas
-import json
+
+from tp1.utils.capture import Capture, Summary
+from tp1.utils.config import logger
 
 
 class Report:
+    """Generation du rapport du TP1."""
+
     def __init__(self, capture: Capture, filename: str, summary: Summary):
+        """Initialisation du rapport."""
         self.capture = capture
         self.filename = filename
         self.title = "TITRE DU RAPPORT"
@@ -74,6 +78,7 @@ class Report:
             self.array = array
 
     def generate_json(self) -> None:
+        """Ecriture du rapport JSON."""
         dictionary = self.summary.to_dict()
         json_output = {
             "protocols": dictionary["protocols"],

@@ -1,12 +1,16 @@
 import json
 from pathlib import Path
+
 from fpdf import FPDF
 
 from tp2.utils.config import logger
 
 
 class Report:
+    """Generation des rapports JSON et PDF."""
+
     def __init__(self, result: dict) -> None:
+        """Stockage du resultat du triage."""
         self.result = result
 
     def generate_pdf(self, out_pdf: str) -> None:
@@ -42,6 +46,7 @@ class Report:
             )
 
     def _write_pdf(self, pdf: FPDF, key: str, value, level: int = 0) -> None:
+        """Ecriture recursive d'une valeur dans le PDF."""
         indent = min(level * 5, 30)
 
         if isinstance(value, dict):

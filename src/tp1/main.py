@@ -1,13 +1,14 @@
+import json
+import sys
+
+from tp1.utils.args import Args
 from tp1.utils.capture import Capture, Summary
 from tp1.utils.config import logger
-from tp1.utils.args import Args
-
-import json
-
 from tp1.utils.report import Report
 
 
 def main():
+    """Point d'entree du TP1 : capture, analyse puis rapport."""
     logger.info("Starting TP1")
 
     capture = Capture()
@@ -18,14 +19,14 @@ def main():
 
     if _summary is None:
         logger.error("Cannot get summary")
-        exit()
+        sys.exit(1)
 
     summary: Summary = _summary
 
     with open(Args.report_path or "report.json", "w") as f:
         json.dump(summary.to_dict(), f)
 
-    logger.debug("summary : {}".format(summary))
+    logger.debug(f"summary : {summary}")
 
     filename = "report.pdf"
     report = Report(capture, filename, summary)

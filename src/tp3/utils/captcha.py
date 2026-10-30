@@ -1,5 +1,8 @@
 class Captcha:
+    """Resolution du captcha."""
+
     def __init__(self, url):
+        """Initialisation du captcha."""
         self.url = url
         self.image = ""
         self.value = ""

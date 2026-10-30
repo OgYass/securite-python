@@ -1,4 +1,6 @@
 import logging
+from typing import ClassVar
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -7,13 +9,16 @@ level = logging.INFO
 
 
 class ColorFormatter(logging.Formatter):
-    COLORS = {
+    """Formatter qui colore les logs selon leur niveau."""
+
+    COLORS: ClassVar[dict[int, str]] = {
         logging.INFO: "\033[32m",
         logging.WARNING: "\033[31m",
     }
     RESET = "\033[0m"
 
     def format(self, record):
+        """Ajoute la couleur du niveau au message formate."""
         message = super().format(record)
         color = self.COLORS.get(record.levelno)
         return f"{color}{message}{self.RESET}" if color else message

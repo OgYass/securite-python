@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import os
+from abc import ABC, abstractmethod
+
 import requests
 
 from tp2.utils.config import logger
@@ -12,15 +13,20 @@ class LLMClient(ABC):
 
     @abstractmethod
     def generate(self, summary: str, system: str) -> str:
+        """Envoie le resume au LLM et renvoie sa reponse texte."""
         raise NotImplementedError
 
 
 class OpenRouterClient(LLMClient):
+    """Client LLM pour OpenRouter."""
+
     def __init__(self) -> None:
+        """Configuration du modele."""
         self.api_key = os.getenv("OPENROUTER_API_KEY")
-        self.model = "recursive/flint-v1.0:free"
+        self.model = "meta-llama/llama-3.3-70b-instruct:free"
 
     def generate(self, summary: str, system: str) -> str:
+        """Envoie le resume au LLM et renvoie sa reponse texte."""
         api_key = self.api_key
         logger.info("calling openrouter backend")
 
@@ -47,10 +53,14 @@ class OpenRouterClient(LLMClient):
 
 
 class OllamaClient(LLMClient):
+    """Client LLM pour Ollama en local."""
+
     def __init__(self) -> None:
+        """Configuration du modele."""
         self.model = "qwen2.5:3b"
 
     def generate(self, summary: str, system: str) -> str:
+        """Envoie le resume au LLM et renvoie sa reponse texte."""
         logger.info("calling ollama backend")
 
         r = requests.post(
