@@ -42,7 +42,7 @@ class OpenRouterClient(LLMClient):
 
         if not r.ok:
             raise RuntimeError(f"Openrouter HTTP {r.status_code}: {r.text}")
-
+        logger.info("LLM has answered")
         return r.json()["choices"][0]["message"]["content"]
 
 
@@ -66,4 +66,5 @@ class OllamaClient(LLMClient):
             timeout=120,
         )
         r.raise_for_status()
+        logger.info("LLM has answered")
         return r.json()["message"]["content"]

@@ -1,0 +1,37 @@
+{
+    "sha256": "e5e41096004d495e36bbac0e7dae4cbc76989c1bb47ea46be5093c0167acf3a5",
+    "md5": "a2e2ac694ba2570ec886fb98b051ae6e",
+    "size": 106,
+    "entropy": 4.669703564474288,
+    "file_type": "ASCII text, with CRLF line terminators",
+    "iocs": {
+        "domains": [
+            "hello.com",
+            "jfpafazfonniezoa112.23.fndjfjaelfneaoof",
+            "more.fr"
+        ],
+        "ips": [
+            "155.155.20.20"
+        ],
+        "urls": [
+            "http://hello.com/here",
+            "https://more.fr"
+        ],
+        "mutex": [],
+        "registry": []
+    },
+    "imports": [],
+    "yara_matches": [
+        {
+            "name": "spoofed",
+            "family": "family",
+            "mitre_attack": "nono",
+            "description": "blabla"
+        }
+    ],
+    "family_guess": "unknown",
+    "mitre_attack": null,
+    "llm_summary": "",
+    "score": 0,
+    "flag": ""
+}

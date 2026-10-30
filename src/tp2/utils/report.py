@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from fpdf import FPDF
 
+from tp2.utils.config import logger
+
 
 class Report:
     def __init__(self, result: dict) -> None:
@@ -28,6 +30,7 @@ class Report:
         """Fichier JSON lisible."""
         path = Path(out_json)
         path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(self.result)
 
         with path.open("w", encoding="utf-8") as file:
             json.dump(

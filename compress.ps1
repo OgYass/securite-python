@@ -1,1 +1,0 @@
-New-Item -ItemType Directory -Force out | Out-Null; tar.exe -a -c -f out/projet.zip --exclude=.venv --exclude=__pycache__ --exclude=.idea --exclude=.vscode --exclude=".*_cache" --exclude=sample.pcap --exclude=out .

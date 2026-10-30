@@ -1,6 +1,7 @@
 import requests
 from tp2.utils.config import logger
 from tp2.utils.llmclient import OpenRouterClient, OllamaClient, LLMClient
+import json
 
 SYSTEM_PROMPT = (
     "Tu es un analyste malware. On te fournit des FEATURES extraites d'un "
@@ -11,7 +12,9 @@ SYSTEM_PROMPT = (
 
 
 def verdict_when_error(summary):
-    return str({"family_guess": None, "mitre_attack": None, "llm_summary": None, "score": None, "flag": None})
+    return json.dumps(
+        {"family_guess": None, "mitre_attack": None, "llm_summary": None, "score": None, "flag": None}
+    )
 
 
 class LLMTriage:

@@ -24,6 +24,10 @@ matplotlib = "^3.11.2"
 reportlab = "^5.0.1"
 python-magic-standalone = "^0.4.28"
 lief = "^1.0.0"
+pymupdf = "^2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest-cov = "^6.2.1"
 
 [build-system]
 requires = ["poetry-core"]

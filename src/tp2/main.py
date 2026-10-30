@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 
 from tp2.utils.config import logger
@@ -26,17 +27,21 @@ def main() -> None:
             logger.info(f"Triage of sample {sample}")
             triage = Triage(sample, str(args.rules), args.llm)
             result = triage.run()
+            # logger.info(type(result))
             # logger.info(result)
 
             logger.info("Success! Writing report...")
-            report = Report(result)
-            report.generate_json(args.out / f"{report.result['sha256']}.triage.json")
-            report.generate_pdf(args.out / f"{report.result['sha256']}.pdf")
-
+            report = Report(json.loads(result))
+            logger.info(report)
+            sha256 = report.result["sha256"]
+            report.generate_json(args.out / f"{sha256}.json")
+            report.generate_json(args.out / f"{sha256}.triage.json")
+            report.generate_pdf(args.out / f"{sha256}.pdf")
+            logger.info(f"Done with {sample}")
         except Exception:
             logger.exception(f"Exception during triage of sample {sample}")
 
-    logger.info("Done")
+    logger.info("All Done")
 
 
 if __name__ == "__main__":

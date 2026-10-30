@@ -71,7 +71,7 @@ def test_metadata_has_expected_keys(tmp_path: Path):
     assert set(metadata.keys()) == {
         "sha256",
         "md5",
-        "ftype",
+        "file_type",
         "size",
         "entropy",
     }
@@ -87,8 +87,8 @@ def test_get_metadata_file_type(tmp_path: Path):
     sample = Sample(str(file_path))
     metadata = sample.get_file_metadata()
 
-    assert isinstance(metadata["ftype"], str)
-    assert metadata["ftype"] != ""
+    assert isinstance(metadata["file_type"], str)
+    assert metadata["file_type"] != ""
 
 
 def test_get_metadata_entropy(tmp_path: Path):

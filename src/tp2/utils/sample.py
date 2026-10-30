@@ -17,10 +17,10 @@ class Sample:
         """sha256, md5, taille, type de fichier, entropie de Shannon."""
         sha256 = hashlib.sha256(self.data).hexdigest()
         md5 = hashlib.md5(self.data).hexdigest()
-        ftype = magic.from_buffer(self.data)
+        file_type = str(magic.from_buffer(self.data))
         size = len(self.data)
         entropy = self.shannon_entropy()
-        return {"sha256": sha256, "md5": md5, "size": size, "entropy": entropy, "file_type": ftype}
+        return {"sha256": sha256, "md5": md5, "size": size, "entropy": entropy, "file_type": file_type}
 
     def shannon_entropy(self) -> float:
         if not self.data:
