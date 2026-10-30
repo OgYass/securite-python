@@ -1,5 +1,4 @@
 import argparse
-import json
 from pathlib import Path
 
 from tp2.utils.config import logger
@@ -31,12 +30,12 @@ def main() -> None:
             # logger.info(result)
 
             logger.info("Success! Writing report...")
-            report = Report(json.loads(result))
-            logger.info(report)
-            sha256 = report.result["sha256"]
-            report.generate_json(args.out / f"{sha256}.json")
-            report.generate_json(args.out / f"{sha256}.triage.json")
-            report.generate_pdf(args.out / f"{sha256}.pdf")
+            report = Report(result)
+            # logger.info(report.result)
+            # sha256 = report.result["sha256"]
+            # report.generate_json(args.out / f"{sample.name}.json")
+            report.generate_json(args.out / f"{sample.name}.triage.json")
+            report.generate_pdf(args.out / f"{sample.name}.pdf")
             logger.info(f"Done with {sample}")
         except Exception:
             logger.exception(f"Exception during triage of sample {sample}")

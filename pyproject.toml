@@ -16,7 +16,6 @@ python = "^3.11"
 requests = "^2.32.3"
 scapy = "^2.6.0"
 pygal = "^3.0.5"
-fpdf2 = "^2.8.1"
 pytest = "==9.1.1"
 capstone = "^5.0.6"
 python-dotenv = "^1.2.1"
@@ -25,9 +24,12 @@ reportlab = "^5.0.1"
 python-magic-standalone = "^0.4.28"
 lief = "^1.0.0"
 pymupdf = "^2.0"
+fpdf2 = "^2.9.0"
+yara-python = "^4.5.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest-cov = "^6.2.1"
+pre-commit = "^4.7.0"
 
 [build-system]
 requires = ["poetry-core"]
